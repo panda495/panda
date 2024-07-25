@@ -5,19 +5,10 @@ var values = {
   textarea : 'テスト送信です', 
   input : {
     'text'           : 'テキスト',
-    'search'         : '検索テキスト',
     'tel'            : '090123145678',
-    'password'       : 'Password1234',
-    'url'            : 'http://abc.def.ghi',
     'email'          : 'test@test.com',
-    'month'          : '2016-01',
-    'week'           : '2016-W01',
-    'date'           : '2016-01-01',
-    'time'           : '12:34',
-    'datetime-local' : '2016-01-01T12:34',
     'number'         : '', // 入力が無ければinputのmax属性の値が入る
     'range'          : '', // 入力が無ければinputのmax属性の値が入る
-    'color'          : '#2477A0',
   }
 };
 
@@ -64,7 +55,7 @@ var runInput = function (formElements) {
   // textareaタグ
   var textareas = formElements.textareas;
   for (var i = 0; i < textareas.length; i += 1) {
-    textareas[i].value = addAttrs(textareas[i]) + values.textarea;
+    textareas[i].value = 'テスト送信です';
   }
 
   // selectタグ
