@@ -2,14 +2,14 @@
 (function () {
 // 固定で入力したい値
 var values = {
-  textarea : 'テキスト\nエリア', // 「\n」で改行できる
+  textarea : 'テスト送信です', 
   input : {
     'text'           : 'テキスト',
     'search'         : '検索テキスト',
     'tel'            : '01234567890',
     'password'       : 'Password1234',
     'url'            : 'http://abc.def.ghi',
-    'email'          : 'mail@abc.def',
+    'email'          : 'test@test.com',
     'month'          : '2016-01',
     'week'           : '2016-W01',
     'date'           : '2016-01-01',
@@ -21,6 +21,18 @@ var values = {
   }
 };
 
+// ClassやID、Nameの名前から種類を推測して入力する
+
+var text_list = {
+  'mail': 'test@test.com',
+  'phone': '090123145678',
+  'tel': '090123145678',
+  'name': 'テスト'
+};
+
+  
+  
+  
 /**
  * タグのname、id、class属性の中身を整形して返す
  * <input name="this_site" id="blog" class="s0014 com">
@@ -71,9 +83,33 @@ var runInput = function (formElements) {
       case 'radio':
         inputs[i].checked = 'checked';
         break;
+        
       case 'text':
-        inputs[i].value = addAttrs(inputs[i]) + values.input[inputs[i].type];
-        break;
+        var inputElement = inputs[i];
+      
+        // 属性の値を取得
+        var id = inputElement.id || '';
+        var classList = Array.from(inputElement.classList).join(' ');
+        var name = inputElement.name || '';
+      
+        // text_list のキーがどれかに含まれているかチェック
+        var found = false;
+        for (var key in text_list) {
+          if (text_list.hasOwnProperty(key)) {
+            if (id.includes(key) || classList.includes(key) || name.includes(key)) {
+              inputElement.value = text_list[key];
+              found = true;
+              break;
+            }
+          }
+        }
+
+        // text_list のキーが含まれていない場合はデフォルト値を設定
+        if (!found) {
+          inputElement.value = 'テスト';
+  }
+  break;
+
       case 'range':
       case 'number':
         var cons = values.input[inputs[i].type];
