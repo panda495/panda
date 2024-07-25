@@ -25,10 +25,10 @@ var values = {
 
 const text_list = {
   'addres': 3730012,
-  'zip': 3730012',
+  'zip': 3730012,
   'mail': 'test@test.com',
-  'phone': '090123145678',
-  'tel': '090123145678',
+  'phone': 090123145678,
+  'tel': 090123145678,
   'name': 'テスト'
 };
 
