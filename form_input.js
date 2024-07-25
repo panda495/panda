@@ -6,7 +6,7 @@ var values = {
   input : {
     'text'           : 'テキスト',
     'search'         : '検索テキスト',
-    'tel'            : '01234567890',
+    'tel'            : '090123145678',
     'password'       : 'Password1234',
     'url'            : 'http://abc.def.ghi',
     'email'          : 'test@test.com',
@@ -23,7 +23,9 @@ var values = {
 
 // ClassやID、Nameの名前から種類を推測して入力する
 
-var text_list = {
+const text_list = {
+  'addres': 3730012',
+  'zip': 3730012',
   'mail': 'test@test.com',
   'phone': '090123145678',
   'tel': '090123145678',
