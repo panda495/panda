@@ -24,7 +24,7 @@ var values = {
 // ClassやID、Nameの名前から種類を推測して入力する
 
 const text_list = {
-  'addres': 3730012',
+  'addres': 3730012,
   'zip': 3730012',
   'mail': 'test@test.com',
   'phone': '090123145678',
