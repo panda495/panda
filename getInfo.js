@@ -1,5 +1,5 @@
 
-const cms_list0729 = {
+var cms_list0729 = {
     "EC-Cube": {
         email: 'test',
         phone: 'test',
@@ -13,6 +13,7 @@ const cms_list0729 = {
         transaction_id: 'test'
     }
 };
+
 
 
 javascript:(function() {
