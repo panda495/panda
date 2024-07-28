@@ -18,8 +18,10 @@ var text_list = {
   'addres': '3730012',
   'zip': '3730012',
   'mail': 'test@test.com',
+  'メール': 'test@test.com',
   'phone': '090123145678',
   'tel': '090123145678',
+  '電話: '090123145678',
   'name': 'テスト'
 };
 
