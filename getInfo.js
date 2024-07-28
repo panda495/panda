@@ -711,14 +711,17 @@ function showPopup(duration = 2000) {
     var popup = document.createElement('div');
     popup.textContent = 'クリックした箇所の要素が表示されます';
     popup.style.position = 'fixed';
-    popup.style.top = '10px';
-    popup.style.right = '10px';
+    popup.style.top = '50%'; // 中央に配置
+    popup.style.left = '50%'; // 中央に配置
+    popup.style.transform = 'translate(-50%, -50%)'; // 中央揃え
     popup.style.backgroundColor = '#000';
     popup.style.color = '#fff';
-    popup.style.padding = '10px';
-    popup.style.borderRadius = '5px';
+    popup.style.padding = '20px'; // サイズを大きくする
+    popup.style.borderRadius = '10px'; // 角を丸くする
     popup.style.zIndex = '9999';
-    popup.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.5)';
+    popup.style.boxShadow = '0 2px 15px rgba(0, 0, 0, 0.7)'; // シャドウを少し強くする
+    popup.style.maxWidth = '300px'; // 最大幅を設定
+    popup.style.textAlign = 'center'; // テキストを中央揃え
     document.body.appendChild(popup);
 
     // 指定した時間後にダイアログを削除
@@ -726,6 +729,7 @@ function showPopup(duration = 2000) {
         document.body.removeChild(popup);
     }, duration);
 }
+
     
 //ーーーーーーーーーーーーーーーー クッキー関連の関数 ーーーーーーーーーーーーーーーー   
     
