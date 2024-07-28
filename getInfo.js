@@ -1,22 +1,21 @@
-
-var cms_list0729 = {
-    "EC-Cube": {
-        email: 'test',
-        phone: 'test',
-        value: 'test',
-        transaction_id: 'test'
-    },
-    "Shopify": {
-        email: 'test',
-        phone: 'test',
-        value: 'test',
-        transaction_id: 'test'
-    }
-};
-
-
-
 javascript:(function() {
+    // CMSリストの宣言
+    const cms_list0729 = {
+        "EC-Cube": {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test'
+        },
+        "Shopify": {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test'
+        }
+    };
+
+
     //起動したことを知らせるポップアップを表示
     showPopup();
 
