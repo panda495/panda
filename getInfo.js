@@ -15,8 +15,11 @@ const cms_list0729 = {
 };
 
 
-
 javascript:(function() {
+    //起動したことを知らせるポップアップを表示
+    showPopup();
+
+    // メイン関数スタート
     document.addEventListener('click', function Get_Elements9876(event) {
     
         event.preventDefault(); // デフォルトのクリック動作を防止
@@ -26,7 +29,8 @@ javascript:(function() {
             return;
         }
         
-    
+
+
     
     // ------------------------変数宣言-----------------------//
         // 全要素を取得、取得したClassなどがいくつあるかカウントするのに使う
@@ -700,6 +704,28 @@ ${if_option02}`
         }
     }
     
+
+// 起動したときにカスタムダイアログを表示する関数
+function showPopup(duration = 2000) {
+    // カスタムダイアログを作成
+    var popup = document.createElement('div');
+    popup.textContent = 'クリックした箇所の要素が表示されます';
+    popup.style.position = 'fixed';
+    popup.style.top = '10px';
+    popup.style.right = '10px';
+    popup.style.backgroundColor = '#000';
+    popup.style.color = '#fff';
+    popup.style.padding = '10px';
+    popup.style.borderRadius = '5px';
+    popup.style.zIndex = '9999';
+    popup.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.5)';
+    document.body.appendChild(popup);
+
+    // 指定した時間後にダイアログを削除
+    setTimeout(function() {
+        document.body.removeChild(popup);
+    }, duration);
+}
     
 //ーーーーーーーーーーーーーーーー クッキー関連の関数 ーーーーーーーーーーーーーーーー   
     
