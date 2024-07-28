@@ -1,3 +1,5 @@
+
+// javascript:(function(url){var s=document.createElement('script');s.src=url+'?t=%27+new Date().getTime();document.body.appendChild(s);})(%27https://panda495.github.io/panda/getInfo.js%27);
 javascript:(function() {
     // CMSリストの宣言
     const cms_list0729 = {
