@@ -5,7 +5,7 @@ var values = {
   textarea : 'テスト送信です', 
   input : {
     'text'           : 'テキスト',
-    'tel'            : '090123145678',
+    'tel'            : '09012345678',
     'email'          : 'test@test.com',
     'number'         : '', // 入力が無ければinputのmax属性の値が入る
     'range'          : '', // 入力が無ければinputのmax属性の値が入る
@@ -19,9 +19,9 @@ var text_list = {
   'zip': '3730012',
   'mail': 'test@test.com',
   'メール': 'test@test.com',
-  'phone': '090123145678',
-  'tel': '090123145678',
-  '電話: '090123145678',
+  'phone': '09012345678',
+  'tel': '09012345678',
+  '電話: '09012345678',
   'name': 'テスト'
 };
 
