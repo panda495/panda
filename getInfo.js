@@ -3,17 +3,154 @@
 javascript:(function() {
     // CMSリストの宣言
     const cms_list0729 = {
+        "Makeshop": {
+            email: '[MAIL_ADDRESS]',
+            phone: '[PHONE_NUMBER]',
+            value: '[ITEM_AMOUNT_TAX]',
+            transaction_id: '[ORDER_NUM]',
+            tips: 'https://ms-manual.makeshop.jp/optionalaffiliate/#list
+                    電話番号とメールはSHA256ハッシュに変換されてる'
+        },
+        "ColorMe Shop": {
+            email: 'Colorme.customer.email',
+            phone: 'Colorme.customer.phone_number',
+            value: 'Colorme.sale.total_price',
+            transaction_id: 'Colorme.sale.id',
+            tips: 'https://developer-docs.shop-pro.jp/document/script-tag-object/#colorme-customer-3'
+        },
+        "Shopify: {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test',
+            tips: ''
+        },
         "EC-Cube": {
             email: 'test',
             phone: 'test',
             value: 'test',
-            transaction_id: 'test'
+            transaction_id: 'test',
+            tips: ''
+        },
+        "Estore Shopserve": {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test',
+            tips: ''
         },
         "Shopify": {
             email: 'test',
             phone: 'test',
             value: 'test',
-            transaction_id: 'test'
+            transaction_id: 'test',
+            tips: ''
+        },
+        "EC-Cube": {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test',
+            tips: ''
+        },
+        "Estore Shopserve": {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test',
+            tips: ''
+        },        
+        "Futureshop": {
+            email: '[MAIL_ADDRESS]',
+            phone: '[PHONE_NUMBER]',
+            value: '[ITEM_AMOUNT_TAX]',
+            transaction_id: '[ORDER_NUM]',
+            tips: 'https://ms-manual.makeshop.jp/optionalaffiliate/#list
+                    電話番号とメールはSHA256ハッシュに変換されてる'
+        },
+        "WIX": {
+            email: 'Colorme.customer.email',
+            phone: 'Colorme.customer.phone_number',
+            value: 'Colorme.sale.total_price',
+            transaction_id: 'Colorme.sale.id',
+            tips: 'https://developer-docs.shop-pro.jp/document/script-tag-object/#colorme-customer-3'
+        },
+        "Base": {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test',
+            tips: ''
+        },
+        "Stores.jp": {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test',
+            tips: ''
+        },
+        "たまごリピート": {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test',
+            tips: ''
+        },
+        "サブスクストア（たまごリピートの亜種）": {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test',
+            tips: ''
+        },
+        "らくうる": {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test',
+            tips: ''
+        },
+        "aispr.jp / aiship.jp (アイシップR)": {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test',
+            tips: ''
+        },
+        "Welcart": {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test',
+            tips: ''
+        },
+        "おちゃのこネット": {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test',
+            tips: ''
+        },
+        "リピスト": {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test',
+            tips: ''
+        },
+        "EC-Force": {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test',
+            tips: ''
+        },
+        "Woocommerce": {
+            email: 'test',
+            phone: 'test',
+            value: 'test',
+            transaction_id: 'test',
+            tips: ''
         }
     };
 
