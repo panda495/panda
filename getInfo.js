@@ -9,14 +9,14 @@ javascript:(function() {
             phone: '[PHONE_NUMBER]',
             value: '[ITEM_AMOUNT_TAX]',
             transaction_id: '[ORDER_NUM]',
-            tips: 'https://ms-manual.makeshop.jp/optionalaffiliate/#list 電話番号とメールはSHA256ハッシュに変換されてる'
+            // tips: 'https://ms-manual.makeshop.jp/optionalaffiliate/#list 電話番号とメールはSHA256ハッシュに変換されてる'
         },
         "ColorMe Shop": {
             email: 'Colorme.customer.email',
             phone: 'Colorme.customer.phone_number',
             value: 'Colorme.sale.total_price',
             transaction_id: 'Colorme.sale.id',
-            tips: 'https://developer-docs.shop-pro.jp/document/script-tag-object/#colorme-customer-3'
+            // tips: 'https://developer-docs.shop-pro.jp/document/script-tag-object/#colorme-customer-3'
         },
         "Shopify": {
             email: 'test',
