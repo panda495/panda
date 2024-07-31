@@ -7,9 +7,20 @@ javascript:(function() {
         "Makeshop": {
             email: '[MAIL_ADDRESS]',
             phone: '[PHONE_NUMBER]',
-            value: '[ITEM_AMOUNT_TAX]',
+            value: '[TOTAL_AMOUNT]',
             transaction_id: '[ORDER_NUM]',
-            // tips: 'https://ms-manual.makeshop.jp/optionalaffiliate/#list 電話番号とメールはSHA256ハッシュに変換されてる'
+            tips: `https://ms-manual.makeshop.jp/optionalaffiliate/#list  
+                電話番号とメールはSHA256ハッシュに変換されてる 
+                データレイヤーは使えない
+                <div hidden id="price00" >[ITEM_AMOUNT_TAX] </div>
+                    <div hidden id="orderID00" >[ORDER_NUM]</div>
+                    function (){
+                        return parseFloat(document.querySelector('#orderID00').innerText);
+                    }
+                    function (){
+                        return parseFloat(document.querySelector('#price00').innerText);
+                    }
+                    `
         },
         "ColorMe Shop": {
             email: 'Colorme.customer.email',
