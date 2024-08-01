@@ -27,7 +27,15 @@ javascript:(function() {
             phone: 'Colorme.customer.phone_number',
             value: 'Colorme.sale.total_price',
             transaction_id: 'Colorme.sale.id',
-            // tips: 'https://developer-docs.shop-pro.jp/document/script-tag-object/#colorme-customer-3'
+            // tips: `https://developer-docs.shop-pro.jp/document/script-tag-object/#colorme-customer-3
+            <!-- Event snippet for 購入完了 conversion page -->
+            <script>
+            gtag('event', 'conversion', {'send_to': 'AW-780524447/sc-ECJno44gYEJ-3l_QC',
+            'value': window.parent.Colorme.sale.total_price,
+            'currency': 'JPY',
+            'transaction_id': window.parent.Colorme.sale.id});
+            </script>
+        `
         },
         "Shopify": {
             email: 'test',
