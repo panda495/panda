@@ -28,6 +28,7 @@ javascript:(function() {
             value: 'Colorme.sale.total_price',
             transaction_id: 'Colorme.sale.id',
             // tips: `https://developer-docs.shop-pro.jp/document/script-tag-object/#colorme-customer-3
+            コードがIframe内に挿入されるのでwindow.parentがないと変数が動かない
             <!-- Event snippet for 購入完了 conversion page -->
             <script>
             gtag('event', 'conversion', {'send_to': 'AW-780524447/sc-ECJno44gYEJ-3l_QC',
