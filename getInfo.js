@@ -782,8 +782,7 @@ ${if_option02}`
                     case 'myCheckbox_mail':
                         EC_option_content = 
 `function (){
-    return 
-    document.querySelector('${selector5555}').value;
+    return document.querySelector('${selector5555}').value;
 }`;
 
                         updateTextarea(); // テキストエリアの内容を更新
@@ -791,8 +790,7 @@ ${if_option02}`
                     case 'myCheckbox_tell':
                         EC_option_content = 
 `function (){
-    return 
-    document.querySelector('${selector5555}').value.replace(/[^0-9]/g,'').replace('0','+81');  
+    return document.querySelector('${selector5555}').value.replace(/[^0-9]/g,'').replace('0','+81');  
 }
                             `;
 
