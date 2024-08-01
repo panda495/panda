@@ -27,7 +27,7 @@ javascript:(function() {
             phone: 'Colorme.customer.phone_number',
             value: 'Colorme.sale.total_price',
             transaction_id: 'Colorme.sale.id',
-            // tips: `https://developer-docs.shop-pro.jp/document/script-tag-object/#colorme-customer-3
+            tips: `https://developer-docs.shop-pro.jp/document/script-tag-object/#colorme-customer-3
             コードがIframe内に挿入されるのでwindow.parentがないと変数が動かない
             <!-- Event snippet for 購入完了 conversion page -->
             <script>
