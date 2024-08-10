@@ -15,14 +15,14 @@ var values = {
 // ClassやID、Nameの名前から種類を推測して入力する
 
 var text_list = {
-  'addres': '3730012',
-  'zip': '3730012',
   'mail': 'test@test.com',
   'メール': 'test@test.com',
   'phone': '09012345678',
   'tel': '09012345678',
   '電話: '09012345678',
   'name': 'テスト'
+  'addres': '3730012',
+  'zip': '3730012'
 };
 
   
@@ -45,6 +45,9 @@ var addAttrs = function (tag) {
   }
   if (tag.classList.length) {
     attr += "." + String(tag.classList).replace(" ", ".");
+  }
+  if (tag.placeholder) {
+    attr += " (" + tag.placeholder + ")";
   }
   return attr + "]";
 };
@@ -102,10 +105,9 @@ var runInput = function (formElements) {
         // text_list のキーが含まれていない場合はデフォルト値を設定
         if (!found) {
           inputElement.value = 'テスト';
-  }
-  break;
+        }
+        break;
 
-      case 'range':
       case 'number':
         var cons = values.input[inputs[i].type];
         inputs[i].value = cons? cons : inputs[i].max;
