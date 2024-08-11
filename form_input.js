@@ -75,7 +75,9 @@
       var inputs = formElements.inputs;
 
       //required属性をチェックして、もしあればそれでフィルターかけてる
-      inputs = check_required_attr(inputs)
+    //   inputs = check_required_attr(inputs)
+
+      //requiredという文字列がClass Listに含まれているかをチェックして、もしあればフィルターかけてる（主にWPCF7フォーム用
       inputs = check_classList_required(inputs)
     
       
@@ -153,6 +155,7 @@
                 requiredInputs.push(inputs[i]); // 条件を満たす要素を追加
             }
         }
+
 
         // 必要な要素があれば、それを返す
         return requiredInputs.length > 0 ? requiredInputs : inputs;
