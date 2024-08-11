@@ -131,47 +131,46 @@
     // Required属性をチェック
     function check_required_attr(inputs) {
         var filteredInputs = []; // 新しい配列を作成
-        var number_checkBox = 0; //チェックボックスの数、最後にこの数を総数から引く 
+        var hasRequired = false;
 
         // InputにRequiredが使用されているかチェックし、条件を満たす要素を追加
         for (var i = 0; i < inputs.length; i += 1) {
             // type が radio または checkbox の場合は無条件で追加
             if (inputs[i].type === 'radio' || inputs[i].type === 'checkbox') {
                 filteredInputs.push(inputs[i]);
-                number_checkBox += 1; // number_checkBox の値を1増やす
             }
             // required 属性がある場合も追加
             else if (inputs[i].hasAttribute('required')) {
                 filteredInputs.push(inputs[i]);
+                hasRequired = true; // Required属性がある要素が見つかった場合、フラグを立てる
             }
         }
 
         // Required属性がある要素があれば、それを返す。なければ元の inputs を返す。
-        return filteredInputs.length - number_checkBox > 0 ? filteredInputs : inputs;
+        return hasRequired ? filteredInputs : inputs;
     }
 
 
     // クラス名に 'required' が含まれるか、または type が 'radio' または 'checkbox' の場合をチェック
     function check_classList_required(inputs) {
         var requiredInputs = []; // 新しい配列を作成
-        var number_checkBox = 0; //チェックボックスの数、最後にこの数を総数から引く 
+        var hasRequired = false;
 
         // InputにRequiredが使用されているかチェックし、条件を満たす要素を追加
         for (var i = 0; i < inputs.length; i += 1) {
             // type が radio または checkbox の場合は無条件で追加
             if (inputs[i].type === 'radio' || inputs[i].type === 'checkbox') {
                 requiredInputs.push(inputs[i]);
-                number_checkBox += 1; // number_checkBox の値を1増やす
-
             }
             // クラス名に 'required' を含む場合も追加
             else if (inputs[i].classList.toString().includes('required')) {
                 requiredInputs.push(inputs[i]);
+                hasRequired = true; // Required属性がある要素が見つかった場合、フラグを立てる
             }
         }
 
-        // 条件を満たす要素があれば、それを返す。なければ元の inputs を返す。
-        return requiredInputs.length  - number_checkBox > 0 ? requiredInputs : inputs;
+        // Required属性がある要素があれば、それを返す。なければ元の inputs を返す。
+        return hasRequired ? filteredInputs : inputs;
     }
 
 
