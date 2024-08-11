@@ -76,6 +76,7 @@
 
       //required属性をチェックして、もしあればそれでフィルターかけてる
       inputs = check_required_attr(inputs)
+      inputs = check_classList_required(inputs)
     
       
       for (var i = 0; i < inputs.length; i += 1) {
