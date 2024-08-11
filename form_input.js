@@ -77,14 +77,10 @@
       //required属性をチェックして、もしあればそれでフィルターかけてる
       inputs = check_required_attr(inputs)
 
-console.log('Required属性チェック後のInputの要素数: ' + inputs.length);
-
-        
       //requiredという文字列がClass Listに含まれているかをチェックして、もしあればフィルターかけてる（主にWPCF7フォーム用
       inputs = check_classList_required(inputs)
     
-        console.log('Required classチェック後のInputの要素数' + inputs.length)
-        
+      
       for (var i = 0; i < inputs.length; i += 1) {
         // 属性毎に処理
         switch (inputs[i].type) {
@@ -138,8 +134,13 @@ console.log('Required属性チェック後のInputの要素数: ' + inputs.lengt
 
         // InputにRequiredが使用されているかチェックし、条件を満たす要素を追加
         for (var i = 0; i < inputs.length; i += 1) {
-            if (inputs[i].hasAttribute('required')) {
-                filteredInputs.push(inputs[i]); // 条件を満たす要素を追加
+            // type が radio または checkbox の場合は無条件で追加
+            if (inputs[i].type === 'radio' || inputs[i].type === 'checkbox') {
+                filteredInputs.push(inputs[i]);
+            }
+            // required 属性がある場合も追加
+            else if (inputs[i].hasAttribute('required')) {
+                filteredInputs.push(inputs[i]);
             }
         }
 
@@ -148,22 +149,26 @@ console.log('Required属性チェック後のInputの要素数: ' + inputs.lengt
     }
 
 
-    // Requiredという文字列がClassに含まれているかをチェック、主にWPCF7フォーム用
+    // クラス名に 'required' が含まれるか、または type が 'radio' または 'checkbox' の場合をチェック
     function check_classList_required(inputs) {
         var requiredInputs = []; // 新しい配列を作成
 
-        // InputにRequiredが使用されているのがあるかチェック
+        // InputにRequiredが使用されているかチェックし、条件を満たす要素を追加
         for (var i = 0; i < inputs.length; i += 1) {
-            // クラス名が 'required' を含むかチェック
-            if (inputs[i].classList.toString().includes('required')) {
-                requiredInputs.push(inputs[i]); // 条件を満たす要素を追加
+            // type が radio または checkbox の場合は無条件で追加
+            if (inputs[i].type === 'radio' || inputs[i].type === 'checkbox') {
+                requiredInputs.push(inputs[i]);
+            }
+            // クラス名に 'required' を含む場合も追加
+            else if (inputs[i].classList.toString().includes('required')) {
+                requiredInputs.push(inputs[i]);
             }
         }
 
-
-        // 必要な要素があれば、それを返す
+        // 条件を満たす要素があれば、それを返す。なければ元の inputs を返す。
         return requiredInputs.length > 0 ? requiredInputs : inputs;
     }
+
 
 
 
