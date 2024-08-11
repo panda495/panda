@@ -153,18 +153,18 @@
 
     // クラス名に 'required' が含まれるか、または type が 'radio' または 'checkbox' の場合をチェック
     function check_classList_required(inputs) {
-        var requiredInputs = []; // 新しい配列を作成
+        var filteredInputs = []; // 新しい配列を作成
         var hasRequired = false;
 
         // InputにRequiredが使用されているかチェックし、条件を満たす要素を追加
         for (var i = 0; i < inputs.length; i += 1) {
             // type が radio または checkbox の場合は無条件で追加
             if (inputs[i].type === 'radio' || inputs[i].type === 'checkbox') {
-                requiredInputs.push(inputs[i]);
+                filteredInputs.push(inputs[i]);
             }
             // クラス名に 'required' を含む場合も追加
             else if (inputs[i].classList.toString().includes('required')) {
-                requiredInputs.push(inputs[i]);
+                filteredInputs.push(inputs[i]);
                 hasRequired = true; // Required属性がある要素が見つかった場合、フラグを立てる
             }
         }
@@ -172,8 +172,6 @@
         // Required属性がある要素があれば、それを返す。なければ元の inputs を返す。
         return hasRequired ? filteredInputs : inputs;
     }
-
-
 
 
       
