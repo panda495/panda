@@ -71,8 +71,14 @@
         }
       }
     
-      // inputタグ
-      var inputs = formElements.inputs;
+        // すべての input タグを取得
+        var all_inputs = formElements.inputs;
+
+        // type が hidden でない input 要素のみを取得
+        var inputs = Array.from(all_inputs).filter(function(input) {
+            return input.type !== 'hidden';
+        });
+
 
       //required属性をチェックして、もしあればそれでフィルターかけてる
       inputs = check_required_attr(inputs)
@@ -109,6 +115,9 @@
                 }
               }
             }
+
+            //電話番号Inputが３つあるとき用のコード、最後に実行することで他のコードでValueの上書きされるのを防いでる
+            Phone_3inputs(inputs)
     
             // text_list のキーが含まれていない場合はデフォルト値を設定
             if (!found) {
@@ -171,6 +180,46 @@
 
         // Required属性がある要素があれば、それを返す。なければ元の inputs を返す。
         return hasRequired ? filteredInputs : inputs;
+    }
+
+
+    function Phone_3inputs(inputs) {
+        var phoneInputs = [];
+        var phoneKeys = ['tel', 'phone', '電話'];
+  
+    
+        // 電話番号に関連する input 要素を収集
+        //ClassやNameなどすべての要素をひとつの文字列にしてる
+        for (var j = 0; j < inputs.length; j++) {
+            var element = inputs[j];
+            var combinedString = [
+                element.id || '',
+                Array.from(element.classList).join(' '),
+                element.name || '',
+                element.placeholder || ''
+            ].join(' ');
+    
+            // 要素をまとめた文字列ないにKeyがないかをチェック
+            for (var key of phoneKeys) {
+                if (combinedString.includes(key)) {
+                    phoneInputs.push(element);
+                    break; // 1つのキーに対して1度だけ追加
+                }
+            }
+        }
+        
+        console.log(phoneInputs.length)
+        
+        // phoneInputs に3つの要素がある場合にのみ処理を行う
+        if (phoneInputs.length === 3) {
+            var phoneSegments = ['090', '1234', '5678'];
+    
+            for (var k = 0; k < phoneInputs.length; k++) {
+                phoneInputs[k].value = phoneSegments[k];
+            }
+            
+
+        }
     }
 
 
