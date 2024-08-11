@@ -77,12 +77,13 @@
       //required属性をチェックして、もしあればそれでフィルターかけてる
       inputs = check_required_attr(inputs)
 
-    console.log('Required属性チェック後のInputの要素数' + inputs.lengs)
+console.log('Required属性チェック後のInputの要素数: ' + inputs.length);
+
         
       //requiredという文字列がClass Listに含まれているかをチェックして、もしあればフィルターかけてる（主にWPCF7フォーム用
       inputs = check_classList_required(inputs)
     
-        console.log('Required classチェック後のInputの要素数' + inputs.lengs)
+        console.log('Required classチェック後のInputの要素数' + inputs.length)
         
       for (var i = 0; i < inputs.length; i += 1) {
         // 属性毎に処理
