@@ -74,6 +74,24 @@ var runInput = function (formElements) {
 
   // inputタグ
   var inputs = formElements.inputs;
+  var Required_Flag = false;
+  
+  //InputにRequiredが使用されているのがあるかチェック
+  for (var i = 0; i < inputs.length; i += 1) {
+    if (inputs[i].hasAttribute('required')) {
+      Required_Flag = true;
+      break; // 1つでも見つかったらループを終了
+    }
+  }
+
+// InputにRequiredが使用されていたらRequiredのもののみを残す
+if (Required_Flag) {
+  inputs = inputs.filter(function(input) {
+    return input.hasAttribute('required');
+  });
+}
+
+  
   for (var i = 0; i < inputs.length; i += 1) {
     // 属性毎に処理
     switch (inputs[i].type) {
