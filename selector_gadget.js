@@ -32,6 +32,11 @@ gadgetBox.style.zIndex = '1000';
 // updateDialogContent関数で使用するのでグローバルにしてる
 var gadgetTitle = document.createElement('span');
 
+// ダイアログ内のコンテンツエリア
+var dialogContent = document.createElement('div');
+dialogContent.id = 'dialogContent';
+gadgetBox.appendChild(dialogContent);
+
 // --------メイン関数部分-------------
 (function() {    
 
@@ -42,16 +47,23 @@ var gadgetTitle = document.createElement('span');
         document.addEventListener('click', setupClickListener);
 
 
-        uniqueSelector = auto_detict();
+        var AutoDetects = auto_detict_input(); //戻り値はObject
         
-        if (uniqueSelector) {
-            updateDialogContent('自動検出が成功しました') 
+        if (AutoDetects.mail) {
+            console.log('fired auto detect input')
+            updateDialogContent_autoDetect(AutoDetects.mail,AutoDetects.phone,AutoDetects.type) 
+        }else{
+            //InputでDetectできなかったらTextで行い、DetectできたらContentのUpdateする
+            
+            var AutoDetects_text = auto_detict_text();
+            if (AutoDetects_text.mail) {
+                console.log('fired auto detect text')
+                updateDialogContent_autoDetect(AutoDetects_text.mail,AutoDetects_text.phone,AutoDetects_text.type) 
+            }
         }
-    
+
 
     });
-
-
 
 })();
     
@@ -105,9 +117,16 @@ function setupClickListener(event) {
 // セレクタがユニークかどうかを判断する関数
 // quaryselectorAllして数が１つならTrue、違うとFalse返す
 function isUniqueSelector(selector) {
-    var elements = document.querySelectorAll(selector);
-    return elements.length === 1;
+    // セレクタに無効な部分が含まれていないかを検証
+    try {
+        var elements = document.querySelectorAll(selector);
+        return elements.length === 1;
+    } catch (e) {
+        console.error("Invalid selector: " + selector);
+        return false;
+    }
 }
+
 
 // クリックされた要素のユニークなセレクターを生成する関数
 //引数Elementとなっているが実際はjQuery オブジェクトとしてラップされたDOM 要素
@@ -130,7 +149,10 @@ function getUniqueSelector(element) {
     var attributes = [
         { value: id, selector: id ? `#${id}` : null },
         { value: name, selector: name ? `[name="${name}"]` : null },
-        { value: className, selector: className ? `.${className.replace(/\s+/g, '.')}` : null },
+        { 
+            value: className, 
+            selector: className && className.trim() ? `.${className.trim().replace(/\s+/g, '.')}` : null 
+          },
         ...dataAttributes,
         { value: title, selector: title ? `[title="${title}"]` : null },
         { value: alt, selector: alt ? `[alt="${alt}"]` : null },
@@ -315,10 +337,7 @@ function making_dialog(gadgetBox) {
 
 //  ----- GTMやGtagのコード関連-------
 
-// ダイアログ内のコンテンツエリア
-var dialogContent = document.createElement('div');
-dialogContent.id = 'dialogContent';
-gadgetBox.appendChild(dialogContent);
+
 
 
 
@@ -366,11 +385,92 @@ function updateDialogContent(uniqueSelector) {
         gadgetTitle.textContent = `document.querySelector('${uniqueSelector}')`;
     }
         
-
 }
 
 
-function auto_detict() {
+// AutoDetectのContentを作成する関数
+function generateAutoDetectCode(mail_selector,phone_selector,type) {
+
+    return `
+<script>
+gtag('set', 'user_data', {
+    "email": ${mail_selector}.${type}, 
+    "phone_number": ${phone_selector}.${type}
+});
+</script>
+
+GTMメール
+function (){
+    return document.querySelector('${mail_selector}').${type};
+}
+
+GTM電話
+function (){
+    return document.querySelector('${phone_selector}').${type}.replace(/[^0-9]/g,'').replace('0','+81');  
+}`;
+    }
+
+
+// AutoDetectが発火したときにダイアログボックス内のコンテンツを更新する関数
+function updateDialogContent_autoDetect(mail_selector,phone_selector,type) {
+    var auto_detictContent = generateAutoDetectCode(mail_selector,phone_selector,type);
+    var auto_detictContent_display = auto_detictContent
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    var dialogContent = document.querySelector('#dialogContent');
+    if (dialogContent) {
+        dialogContent.innerHTML = `<pre style="font-size: 13px; font-family: monospace; overflow-x: auto; white-space: pre;">${auto_detictContent_display}</pre>`;
+    }
+
+  
+    gadgetTitle.textContent = '自動検出が成功しました';
+    
+
+            
+}
+
+
+function auto_detict_text() {
+    // すべての要素を取得
+    var allElements = document.querySelectorAll('*');
+
+    var targetElement = null;
+    var mail_selector = null;
+    var phone_selector = null;    
+    var phone_regex = /^0\d{1,4}-?\d{1,4}-?\d{3,4}$/; // 電話番号の正規表現
+
+
+    // 各要素をループして、テキスト内容からtest@test.comを探す
+    allElements.forEach(function(element) {
+        if (element.textContent.includes('test@test.com')) {
+            targetElement = $(element); // jQuery オブジェクトに変換
+            mail_selector = getUniqueSelector(targetElement); // jQuery オブジェクトを渡す
+
+            return;  // 目的の要素を見つけたらループを終了
+        }
+    });
+    //メールが見つかったらPhoneも探す
+    if(mail_selector){
+        allElements.forEach(function(element) {
+            if (phone_regex.test(element.textContent)) {
+                targetElement = $(element); // jQuery オブジェクトに変換
+                phone_selector = getUniqueSelector(targetElement); // jQuery オブジェクトを渡す
+                return;  // 目的の要素を見つけたらループを終了
+            }
+        });
+    }
+
+
+    return {
+        mail: mail_selector,
+        phone: phone_selector,
+        type: 'innerText'
+    };
+}
+
+
+function auto_detict_input() {
     // inputでClassやID、Placeholderなどからメールアドレスと判断できるものを取得
     var mail_words = [
         '@',
@@ -378,49 +478,71 @@ function auto_detict() {
         'メール'
     ];
     
-    // var phone_words = [
-    //     'phone',
-    //     'tel',
-    //     '電話'
-    // ];
+    var phone_words = [
+        'phone',
+        'tel',
+        '電話'
+    ];
 
+    var mail_input = null;
+    var phone_input = null;
+    var mail_selector = null;
+    var phone_selector = null;
+
+    mail_input = check_key_list_fromInput(mail_words)
+
+
+    if (mail_input) {
+        mail_selector = getUniqueSelector(mail_input); // jQuery オブジェクトを渡す
+
+        // メールが見つかったときだけ電話の自動検出を行う
+        phone_input = check_key_list_fromInput(phone_words)
+        phone_selector = getUniqueSelector(phone_input); // jQuery オブジェクトを渡す
+
+    }
+    
+
+    return {
+        mail: mail_selector,
+        phone: phone_selector,
+         type: 'value'
+    };
+}
+
+
+
+
+
+function check_key_list_fromInput(key_list) {
     // すべての input タグを取得
     var all_inputs = document.querySelectorAll('input');
-
 
     // type が hidden でない input 要素のみを取得
     var inputs = Array.from(all_inputs).filter(function(input) {
         return input.type !== 'hidden';
     });
 
-
-    var mail_input = null;
-    var mail_selector = null
-
-    // 属性の値を取得
+    var key_input = null;
+    // キーワードリストからそのリストに入った言葉の要素を取得
     inputs.some(function(inputElement) {
         var id = inputElement.id || '';
         var classList = Array.from(inputElement.classList).join(' ');
         var name = inputElement.name || '';
         var placeholder = inputElement.placeholder || '';
     
-        // mail_words のいずれかにマッチするかを確認
-        for (var word of mail_words) {
+        // key_list のいずれかにマッチするかを確認
+        for (var word of key_list) {
             if (id.includes(word) || classList.includes(word) || name.includes(word) || placeholder.includes(word)) {
-                mail_input = $(inputElement); // jQuery オブジェクトに変換
+                key_input = $(inputElement); // jQuery オブジェクトに変換
                 return true; // ループを終了
             }
         }
         return false;
     });
 
-    if (mail_input) {
-        mail_selector = getUniqueSelector(mail_input); // jQuery オブジェクトを渡す
-    }
-    
-
-    return mail_selector
+    return key_input; // ここで key_input を返す
 }
+
 
 
         // スクリプトコードの変数
