@@ -30,7 +30,34 @@ gadgetBox.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
 gadgetBox.style.zIndex = '1000';
 
 // updateDialogContent関数で使用するのでグローバルにしてる
+// ヘッダーの作成
+var gadgetHeader = document.createElement('div');
+gadgetHeader.style.display = 'flex';
+gadgetHeader.style.justifyContent = 'space-between';
+gadgetHeader.style.alignItems = 'center';
+gadgetHeader.style.marginBottom = '10px'
+gadgetBox.appendChild(gadgetHeader);
+
 var gadgetTitle = document.createElement('span');
+gadgetTitle.style.cursor = 'pointer';
+gadgetTitle.textContent = 'Selector Gadget';
+gadgetTitle.setAttribute('title', 'Click to copy'); // ツールチップ
+gadgetHeader.appendChild(gadgetTitle);
+
+
+
+var closeButton = document.createElement('button');
+closeButton.textContent = '×';
+closeButton.style.background = 'none';
+closeButton.style.border = 'none';
+closeButton.style.color = '#fff';
+closeButton.style.fontSize = '16px';
+closeButton.style.cursor = 'pointer';
+closeButton.onclick = function() {
+    gadgetBox.style.display = 'none';
+    document.removeEventListener('click', setupClickListener);
+};
+gadgetHeader.appendChild(closeButton);
 
 // ダイアログ内のコンテンツエリア
 var dialogContent = document.createElement('div');
@@ -42,11 +69,14 @@ gadgetBox.appendChild(dialogContent);
 
     making_dialog(gadgetBox);
     // jQueryをロードしてからクリックリスナーを設定
+
+    addCopyEvent_title();
+
     loadJQuery(function() {
         // jQueryがロードされた後にクリックイベントリスナーを設定
         document.addEventListener('click', setupClickListener);
 
-
+        detect_iframe();
         var AutoDetects = auto_detict_input(); //戻り値はObject
         
         if (AutoDetects.mail) {
@@ -231,30 +261,7 @@ function getUniqueSelector(element) {
 
 function making_dialog(gadgetBox) {
 
-    // ヘッダーの作成
-    var gadgetHeader = document.createElement('div');
-    gadgetHeader.style.display = 'flex';
-    gadgetHeader.style.justifyContent = 'space-between';
-    gadgetHeader.style.alignItems = 'center';
 
-
-    gadgetTitle.textContent = 'Selector Gadget';
-    gadgetHeader.appendChild(gadgetTitle);
-
-    var closeButton = document.createElement('button');
-    closeButton.textContent = '×';
-    closeButton.style.background = 'none';
-    closeButton.style.border = 'none';
-    closeButton.style.color = '#fff';
-    closeButton.style.fontSize = '16px';
-    closeButton.style.cursor = 'pointer';
-    closeButton.onclick = function() {
-        gadgetBox.style.display = 'none';
-        document.removeEventListener('click', setupClickListener);
-    };
-    gadgetHeader.appendChild(closeButton);
-
-    gadgetBox.appendChild(gadgetHeader);
 
     // ボディ部分の作成
     var gadgetBody = document.createElement('div');
@@ -332,6 +339,38 @@ function making_dialog(gadgetBox) {
 
     document.body.appendChild(gadgetBox);
 
+
+    // 最小化ボタンの作成
+    var minimizeButton = document.createElement('button');
+    minimizeButton.textContent = '-';
+    minimizeButton.style.position = 'absolute';
+    minimizeButton.style.top = '5px';
+    minimizeButton.style.right = '40px'; // Closeボタンの左側に配置
+    minimizeButton.style.backgroundColor = '#555';
+    minimizeButton.style.color = '#fff';
+    minimizeButton.style.border = 'none';
+    minimizeButton.style.padding = '5px';
+    minimizeButton.style.borderRadius = '3px';
+    minimizeButton.style.cursor = 'pointer';
+    gadgetHeader.appendChild(minimizeButton);
+
+    // ダイアログ内のコンテンツエリア
+    var dialogContent = document.createElement('div');
+    dialogContent.id = 'dialogContent';
+    gadgetBox.appendChild(dialogContent);
+
+    // 最小化ボタンのクリックイベント
+    minimizeButton.addEventListener('click', function() {
+        if (dialogContent.style.display === 'none') {
+            dialogContent.style.display = 'block';
+            gadgetBox.style.height = '80vh';
+            minimizeButton.textContent = '-';
+        } else {
+            dialogContent.style.display = 'none';
+            gadgetBox.style.height = '30px';
+            minimizeButton.textContent = '+';
+        }
+    });
     
 }  
 
@@ -363,8 +402,7 @@ function (){
 GTM電話
 function (){
     return document.querySelector('${uniqueSelector}').value.replace(/[^0-9]/g,'').replace('0','+81');  
-}
-            `;
+}`;
         }
 
 // ダイアログボックス内のコンテンツを更新する関数
@@ -379,11 +417,8 @@ function updateDialogContent(uniqueSelector) {
         dialogContent.innerHTML = `<pre style="font-size: 13px; font-family: monospace; overflow-x: auto; white-space: pre;">${code_gtag_display}</pre>`;
     }
 
-    if(uniqueSelector == '自動検出が成功しました'){
-        gadgetTitle.textContent = '自動検出が成功しました';
-    }else{
-        gadgetTitle.textContent = `document.querySelector('${uniqueSelector}')`;
-    }
+    gadgetTitle.textContent = `document.querySelector('${uniqueSelector}')`;
+    addGreenBorder(uniqueSelector);    
         
 }
 
@@ -394,8 +429,10 @@ function generateAutoDetectCode(mail_selector,phone_selector,type) {
     return `
 <script>
 gtag('set', 'user_data', {
-    "email": ${mail_selector}.${type}, 
-    "phone_number": ${phone_selector}.${type}
+    var ec_mail = document.querySelector('${mail_selector}').${type};
+    var ec_phone = document.querySelector('${phone_selector}').${type};
+    "email": var ec_mail, 
+    "phone_number": var ec_phone
 });
 </script>
 
@@ -408,7 +445,7 @@ GTM電話
 function (){
     return document.querySelector('${phone_selector}').${type}.replace(/[^0-9]/g,'').replace('0','+81');  
 }`;
-    }
+}
 
 
 // AutoDetectが発火したときにダイアログボックス内のコンテンツを更新する関数
@@ -511,8 +548,6 @@ function auto_detict_input() {
 
 
 
-
-
 function check_key_list_fromInput(key_list) {
     // すべての input タグを取得
     var all_inputs = document.querySelectorAll('input');
@@ -542,6 +577,121 @@ function check_key_list_fromInput(key_list) {
 
     return key_input; // ここで key_input を返す
 }
+
+
+function detect_iframe() {
+    var all_iframe = document.querySelectorAll('iframe');
+
+    all_iframe.forEach(function(iframe) {
+        iframe.style.border = '5px solid red';  // 太い赤のボーダー
+
+        var overlay000 = document.createElement('div');
+        overlay000.style.position = 'absolute';
+        overlay000.style.top = 0;
+        overlay000.style.left = 0;
+        overlay000.style.width = '100%';
+        overlay000.style.height = '100%';
+        overlay000.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';  // 透明度50%の赤
+        overlay000.style.pointerEvents = 'none';  // クリックを透過させる
+
+        // IframeのOriginを取得して表示するための要素を作成
+        var originText = document.createElement('div');
+        originText.style.position = 'absolute';
+        originText.style.bottom = '10px';
+        originText.style.right = '10px';
+        originText.style.color = 'white';
+        originText.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        originText.style.padding = '5px';
+        originText.style.fontSize = '12px';
+        originText.style.borderRadius = '3px';
+
+        // iframeのURLを取得
+        try {
+            var iframeURL = iframe.src;
+            originText.textContent = iframeURL;
+        } catch (e) {
+            originText.textContent = 'Unknown URL';
+        }
+
+
+        overlay000.appendChild(originText);  // Originを表示する要素をオーバーレイに追加
+
+        iframe.parentElement.style.position = 'relative';  // 親要素を相対位置に
+        iframe.parentElement.appendChild(overlay000);  // iframeの上にオーバーレイを追加
+    });
+}
+
+// コピー後にメッセージが出る関数
+function showToast(message) {
+    var toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.position = 'fixed';
+    toast.style.backgroundColor = '#333';
+    toast.style.color = '#fff';
+    toast.style.padding = '5px 10px';
+    toast.style.borderRadius = '5px';
+    toast.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+    toast.style.zIndex = '1000';
+    toast.style.whiteSpace = 'nowrap'; // メッセージが折り返さないようにする
+    toast.style.opacity = '0'; // 初期状態で透明にする
+    toast.style.transition = 'opacity 0.5s'; // フェードイン・フェードアウトの効果
+
+    // 位置を設定するためにgadgetTitleの位置を取得
+    var rect = gadgetTitle.getBoundingClientRect();
+
+    toast.style.top = `${rect.top + rect.height / 2}px`; // gadgetTitleの中央に合わせる
+    toast.style.left = `${rect.left + rect.width / 2}px`; // gadgetTitleの中央に合わせる
+    toast.style.transform = 'translate(-50%, -50%)'; // 中央に位置合わせする
+
+    document.body.appendChild(toast);
+
+    // フェードイン
+    setTimeout(() => {
+        toast.style.opacity = '1';
+    }, 0);
+
+    // フェードアウトと削除
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 500); // フェードアウトの時間
+    }, 700); // メッセージの表示時間
+}
+
+
+
+// gadgetTitleにクリックしたら textContent をコピーするイベントを追加
+function addCopyEvent_title() {
+    gadgetTitle.addEventListener('click', function() {
+        var textToCopy = gadgetTitle.textContent;
+        
+        // クリップボードにコピー
+        navigator.clipboard.writeText(textToCopy).then(function() {
+            showToast('copied');
+        }).catch(function(err) {
+            console.error('Could not copy text: ', err);
+        });
+    });
+}
+
+var last_greenBorder = [];
+
+function addGreenBorder(selector) {
+    // 以前の緑枠をリセット
+    last_greenBorder.forEach(function(element) {
+        element.style.border = ''; // 緑枠を削除
+    });
+    last_greenBorder = []; // リストをクリア
+
+    var elements = document.querySelectorAll(selector);
+    elements.forEach(function(element) {
+        element.style.border = '5px solid lightgreen'; // 緑の太枠を設定
+        last_greenBorder.push(element); // 最新の緑枠要素をリストに追加
+    });
+}
+
+
 
 
 
