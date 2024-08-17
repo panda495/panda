@@ -53,9 +53,16 @@ closeButton.style.border = 'none';
 closeButton.style.color = '#fff';
 closeButton.style.fontSize = '16px';
 closeButton.style.cursor = 'pointer';
+
 closeButton.onclick = function() {
     gadgetBox.style.display = 'none';
     document.removeEventListener('click', setupClickListener);
+
+    //選択したところの緑を消してる
+    last_greenBorder.forEach(function(element) {
+        element.style.border = ''; // 緑枠を削除
+    });
+    
 };
 gadgetHeader.appendChild(closeButton);
 
@@ -64,13 +71,15 @@ var dialogContent = document.createElement('div');
 dialogContent.id = 'dialogContent';
 gadgetBox.appendChild(dialogContent);
 
+// 緑枠の変数
+var last_greenBorder = [];
+
 // --------メイン関数部分-------------
 (function() {    
 
     making_dialog(gadgetBox);
-    // jQueryをロードしてからクリックリスナーを設定
 
-    addCopyEvent_title();
+    overridePreCssRules();//外部CSSでPre要素についての言及があったときに、Dialog内の表示がおかしくなるので、ルールを上書き
 
     loadJQuery(function() {
         // jQueryがロードされた後にクリックイベントリスナーを設定
@@ -118,10 +127,12 @@ function loadJQuery(callback) {
 // CSS取得実行関数
 function setupClickListener(event) {
 
+
     // ダイアログボックス内のクリックを無視
-    if (gadgetBox.contains(event.target)) {
+    if (gadgetBox.contains(event.target) || event.target.classList.contains('StopEvent000')) {
         return;
     }
+
 
     event.preventDefault();  // デフォルトのアクションを防ぐ
     event.stopPropagation(); // イベントのバブリングを停止する
@@ -367,18 +378,15 @@ function making_dialog(gadgetBox) {
             minimizeButton.textContent = '-';
         } else {
             dialogContent.style.display = 'none';
-            gadgetBox.style.height = '30px';
+            gadgetBox.style.height = '50px';
             minimizeButton.textContent = '+';
         }
     });
     
+    addCopyEvent_title(); //タイトルクリックしたらコピーするイベントを追加
 }  
 
 //  ----- GTMやGtagのコード関連-------
-
-
-
-
 
 
 // 初期のcode_gtagを生成する関数
@@ -448,6 +456,7 @@ function (){
 }
 
 
+
 // AutoDetectが発火したときにダイアログボックス内のコンテンツを更新する関数
 function updateDialogContent_autoDetect(mail_selector,phone_selector,type) {
     var auto_detictContent = generateAutoDetectCode(mail_selector,phone_selector,type);
@@ -455,16 +464,30 @@ function updateDialogContent_autoDetect(mail_selector,phone_selector,type) {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
+        
     var dialogContent = document.querySelector('#dialogContent');
     if (dialogContent) {
         dialogContent.innerHTML = `<pre style="font-size: 13px; font-family: monospace; overflow-x: auto; white-space: pre;">${auto_detictContent_display}</pre>`;
     }
 
-  
-    gadgetTitle.textContent = '自動検出が成功しました';
-    
+    last_greenBorder = []; // リストをクリア
 
-            
+    // mail_selector と phone_selector から要素を取得し、緑の枠を設定
+    var mailElement = document.querySelector(mail_selector);
+    var phoneElement = document.querySelector(phone_selector);
+
+    if (mailElement) {
+        mailElement.style.border = '5px solid lightgreen'; // 緑の太枠を設定
+        last_greenBorder.push(mailElement); // 最新の緑枠要素をリストに追加
+    }
+
+    if (phoneElement) {
+        phoneElement.style.border = '5px solid lightgreen'; // 緑の太枠を設定
+        last_greenBorder.push(phoneElement); // 最新の緑枠要素をリストに追加
+    }
+
+    gadgetTitle.textContent = '自動検出が成功しました';
+                
 }
 
 
@@ -583,19 +606,29 @@ function detect_iframe() {
     var all_iframe = document.querySelectorAll('iframe');
 
     all_iframe.forEach(function(iframe) {
-        iframe.style.border = '5px solid red';  // 太い赤のボーダー
+        // iframeの親要素にposition: relativeを設定
+        var parent = iframe.parentElement;
+        parent.style.position = 'relative';
 
+        // iframeに赤の太いボーダーを設定
+        iframe.style.border = '5px solid red';  
+
+        // オーバーレイを作成
         var overlay000 = document.createElement('div');
         overlay000.style.position = 'absolute';
-        overlay000.style.top = 0;
-        overlay000.style.left = 0;
-        overlay000.style.width = '100%';
-        overlay000.style.height = '100%';
+        overlay000.style.top = '-5px';  // ボーダーの外側に配置
+        overlay000.style.left = '-5px';  // ボーダーの外側に配置
+        overlay000.style.width = `calc(100% + 10px)`;  // ボーダー分の幅を追加
+        overlay000.style.height = `calc(100% + 10px)`;  // ボーダー分の高さを追加
         overlay000.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';  // 透明度50%の赤
         overlay000.style.pointerEvents = 'none';  // クリックを透過させる
 
+        // オーバーレイをiframeの親要素に追加
+        parent.appendChild(overlay000);
+    
         // IframeのOriginを取得して表示するための要素を作成
         var originText = document.createElement('div');
+        originText.classList.add('StopEvent000');
         originText.style.position = 'absolute';
         originText.style.bottom = '10px';
         originText.style.right = '10px';
@@ -604,14 +637,23 @@ function detect_iframe() {
         originText.style.padding = '5px';
         originText.style.fontSize = '12px';
         originText.style.borderRadius = '3px';
+        originText.style.maxWidth = '300px';  // 最大幅を設定
+        originText.style.whiteSpace = 'nowrap';  // テキストを1行で表示
+        originText.style.overflow = 'hidden';  // 溢れた部分を非表示に
+        originText.style.textOverflow = 'ellipsis';  // 溢れた部分を省略記号で表示
 
         // iframeのURLを取得
-        try {
-            var iframeURL = iframe.src;
-            originText.textContent = iframeURL;
-        } catch (e) {
+        var iframeURL = iframe.getAttribute('data-src') || iframe.src ;
+        if (iframeURL) {
+            var link = document.createElement('a');
+            link.href = iframeURL;
+            link.target = '_blank';
+            link.textContent = iframeURL;
+            originText.appendChild(link);
+        } else {
             originText.textContent = 'Unknown URL';
         }
+
 
 
         overlay000.appendChild(originText);  // Originを表示する要素をオーバーレイに追加
@@ -620,6 +662,8 @@ function detect_iframe() {
         iframe.parentElement.appendChild(overlay000);  // iframeの上にオーバーレイを追加
     });
 }
+
+
 
 // コピー後にメッセージが出る関数
 function showToast(message) {
@@ -675,7 +719,7 @@ function addCopyEvent_title() {
     });
 }
 
-var last_greenBorder = [];
+
 
 function addGreenBorder(selector) {
     // 以前の緑枠をリセット
@@ -692,7 +736,21 @@ function addGreenBorder(selector) {
 }
 
 
+function overridePreCssRules() {
+    // 新しいスタイル要素を作成
+    const style = document.createElement('style');
+    style.textContent = `
+        pre {
+            color: white;
+            font-style: monospace;
+            line-height: 110%;
+            /* 他のスタイルも必要に応じてここに追加 */
+        }
+    `;
 
+    // <head> 内にスタイル要素を追加
+    document.head.appendChild(style);
+}
 
 
         // スクリプトコードの変数
