@@ -28,6 +28,7 @@ gadgetBox.style.padding = '10px';
 gadgetBox.style.borderRadius = '5px';
 gadgetBox.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
 gadgetBox.style.zIndex = '1000';
+document.body.appendChild(gadgetBox);
 
 // updateDialogContent関数で使用するのでグローバルにしてる
 // ヘッダーの作成
@@ -37,6 +38,12 @@ gadgetHeader.style.justifyContent = 'space-between';
 gadgetHeader.style.alignItems = 'center';
 gadgetHeader.style.marginBottom = '10px'
 gadgetBox.appendChild(gadgetHeader);
+
+// ツールバーの追加
+var ToolBer000 = document.createElement('div');
+ToolBer000.id = 'ToolBer000';
+ToolBer000.style.marginBottom = '10px';
+gadgetBox.appendChild(ToolBer000);
 
 var gadgetTitle = document.createElement('span');
 gadgetTitle.style.cursor = 'pointer';
@@ -62,6 +69,18 @@ closeButton.onclick = function() {
     last_greenBorder.forEach(function(element) {
         element.style.border = ''; // 緑枠を削除
     });
+
+    //Iframeの赤い枠とオーバーレイ消してる
+    var all_iframe = document.querySelectorAll('iframe');
+
+    all_iframe.forEach(function(iframe) {
+        if (iframe.style.border === '5px solid red') {
+            iframe.style.border = '';
+        }
+    });
+
+    
+    
     
 };
 gadgetHeader.appendChild(closeButton);
@@ -69,10 +88,14 @@ gadgetHeader.appendChild(closeButton);
 // ダイアログ内のコンテンツエリア
 var dialogContent = document.createElement('div');
 dialogContent.id = 'dialogContent';
+dialogContent.textContent = ''
 gadgetBox.appendChild(dialogContent);
 
 // 緑枠の変数
 var last_greenBorder = [];
+
+var auto_detict_flag = true;
+
 
 // --------メイン関数部分-------------
 (function() {    
@@ -86,21 +109,13 @@ var last_greenBorder = [];
         document.addEventListener('click', setupClickListener);
 
         detect_iframe();
-        var AutoDetects = auto_detict_input(); //戻り値はObject
-        
-        if (AutoDetects.mail) {
-            console.log('fired auto detect input')
-            updateDialogContent_autoDetect(AutoDetects.mail,AutoDetects.phone,AutoDetects.type) 
-        }else{
-            //InputでDetectできなかったらTextで行い、DetectできたらContentのUpdateする
-            
-            var AutoDetects_text = auto_detict_text();
-            if (AutoDetects_text.mail) {
-                console.log('fired auto detect text')
-                updateDialogContent_autoDetect(AutoDetects_text.mail,AutoDetects_text.phone,AutoDetects_text.type) 
-            }
-        }
 
+        // auto_detictをInputで探してもしもなかったらtest@test.comという文字列があるかを
+        // auto_detict_text()で探している
+        auto_detict_input();
+        if(auto_detict_flag){
+            auto_detict_text();
+        }
 
     });
 
@@ -142,13 +157,8 @@ function setupClickListener(event) {
 
 
     // ダイアログ内容の更新
-    updateDialogContent(uniqueSelector);
+    updateDialogContent(uniqueSelector,event);
 
-    // JS Path形式に変換
-    // var jsPath = uniqueSelector && typeof uniqueSelector === 'string'
-    //     ? "document.querySelector('" + uniqueSelector.replace(/'/g, "\\'") + "')"
-    //     : 'No unique selector found';
-    // alert("JS Path: " + jsPath);
 }
 
 
@@ -263,8 +273,6 @@ function getUniqueSelector(element) {
             return parentSelector ? `${parentSelector} > ${tagName}:nth-child(${index})` : null;
         }
 
-        // ユニークなセレクタが見つからなかった場合、最小限のセレクタを返す
-        // return `${tagName}:nth-child(${element.index() + 1})`;
     }
 
     return findUniqueSelector(element);
@@ -272,16 +280,117 @@ function getUniqueSelector(element) {
 
 function making_dialog(gadgetBox) {
 
-
-
     // ボディ部分の作成
-    var gadgetBody = document.createElement('div');
-    gadgetBody.style.marginTop = '10px';
+    // var gadgetBody = document.createElement('div');
+    // gadgetBody.style.marginTop = '10px';
+
+
+    //ツールバーの中身作成
+    // ToolBer000.style.backgroundColor = 'red';
+
+
+    // Ifボタン
+    var chicButton = document.createElement('button');
+    chicButton.textContent = 'IF';
+    chicButton.style.display = 'inline-block';
+    chicButton.style.padding = '4px 9px';
+    chicButton.style.fontSize = '16px';
+    chicButton.style.fontWeight = 'bold';
+    chicButton.style.color = '#ffffff';
+    chicButton.style.backgroundColor = '#78bd78';
+    chicButton.style.border = '2px solid #ccc';
+    chicButton.style.borderRadius = '3px';
+    chicButton.style.cursor = 'pointer';
+
+    // コピーボタン
+    var copyButton = document.createElement('button');
+    copyButton.textContent = 'Copy';
+    copyButton.style.display = 'inline-block';
+    copyButton.style.padding = '4px 9px';
+    copyButton.style.fontSize = '16px';
+    copyButton.style.fontWeight = 'bold';
+    copyButton.style.color = '#ffffff';
+    copyButton.style.backgroundColor = '#78bd78';
+    copyButton.style.border = '2px solid #ccc';
+    copyButton.style.borderRadius = '3px';
+    copyButton.style.cursor = 'pointer';
+    copyButton.style.marginRight = '10px';
+
+    ToolBer000.appendChild(copyButton);
+    ToolBer000.appendChild(chicButton);
+
+    // addCopyEvent(copyButton,dialogContent);
+
+    if (dialogContent) {
+        addCopyEvent(copyButton, dialogContent);
+    } else {
+        console.error('dialogContent is not defined or not found.');
+    }
+    
+
+    // ToolBer000.appendChild(IfBtnSpan);
+    // ToolBer000.appendChild(IfBtnLabel);
+
+
+    // var IfBtn000 = document.createElement('input');
+    // IfBtn000.type = 'checkbox';
+    // IfBtn000.id = 'ifBtn000';
+    // IfBtn000.checked = false; // 初期状態はオフ
+    // IfBtn000.style.display = 'none'; // チェックボックス自体は非表示
+    
+    // var IfBtnLabel = document.createElement('label');
+    // IfBtnLabel.htmlFor = 'ifBtn000'; // Corrected the 'for' attribute to match 'id'
+    // IfBtnLabel.style.display = 'block';
+    // IfBtnLabel.style.boxSizing = 'border-box';
+    // IfBtnLabel.style.textAlign = 'center';
+    // IfBtnLabel.style.border = '2px solid #ccc';
+    // IfBtnLabel.style.borderRadius = '3px';
+    // IfBtnLabel.style.height = '60px';
+    // IfBtnLabel.style.fontSize = '18px';
+    // IfBtnLabel.style.lineHeight = '60px';
+    // IfBtnLabel.style.fontWeight = 'bold';
+    // IfBtnLabel.style.background = '#eee';
+    // IfBtnLabel.style.boxShadow = '3px 3px 6px #888';
+    // IfBtnLabel.style.transition = '.3s';
+    // IfBtnLabel.style.cursor = 'pointer';
+    
+    // var IfBtnSpan = document.createElement('span');
+    // IfBtnSpan.style.display = 'inline-block';
+    // IfBtnSpan.style.width = '100%';
+    // IfBtnSpan.style.height = '100%';
+    // IfBtnSpan.style.lineHeight = '60px'; // 中央揃え
+    // IfBtnLabel.style.background = '#78bd78';
+    // IfBtnLabel.style.boxShadow = 'none';
+    // IfBtnSpan.textContent = 'ON';
+    // IfBtnSpan.style.color = '#fff';
+    
+    // IfBtnLabel.appendChild(IfBtnSpan);
+    
+    // // IfBtn000のスタイルを更新
+    // function updateIfBtnButton() {
+    //     if (IfBtn000.checked) {
+    //         IfBtnLabel.style.background = '#78bd78';
+    //         IfBtnLabel.style.boxShadow = 'none';
+    //         IfBtnSpan.textContent = 'ON';
+    //         IfBtnSpan.style.color = '#fff';
+    //         document.addEventListener('click', setupClickListener); // 必要に応じてリスナーを追加
+    
+    //     } else {
+    //         IfBtnLabel.style.background = '#eee';
+    //         IfBtnLabel.style.boxShadow = '3px 3px 6px #888';
+    //         IfBtnSpan.textContent = 'OFF';
+    //         IfBtnSpan.style.color = '#aaa';
+    //         document.removeEventListener('click', setupClickListener); // 必要に応じてリスナーを削除
+    //     }
+    // }
+    
+    // // チェックボックスの変更時にIfBtnLabelのスタイルを更新
+    // IfBtn000.addEventListener('change', updateIfBtnButton);
 
     // トグルボタンの作成
     var toggleArea = document.createElement('div');
     toggleArea.style.margin = 'auto';
-    toggleArea.style.width = '60px';
+    // toggleArea.style.width = '60px';
 
     var toggleCheckbox = document.createElement('input');
     toggleCheckbox.type = 'checkbox';
@@ -315,14 +424,6 @@ function making_dialog(gadgetBox) {
     toggleSpan.textContent = 'ON';
     toggleSpan.style.color = '#fff';
 
-    toggleLabel.appendChild(toggleSpan);
-    toggleArea.appendChild(toggleCheckbox);
-    toggleArea.appendChild(toggleLabel);
-
-    gadgetBody.appendChild(toggleArea);
-    gadgetBox.appendChild(gadgetBody);
-
-    document.body.appendChild(gadgetBox);
 
     // トグルボタンのスタイルを更新
     function updateToggleButton() {
@@ -345,10 +446,7 @@ function making_dialog(gadgetBox) {
     // チェックボックスの変更時にトグルボタンのスタイルを更新
     toggleCheckbox.addEventListener('change', updateToggleButton);
 
-    gadgetBody.appendChild(toggleLabel);
-    gadgetBox.appendChild(gadgetBody);
 
-    document.body.appendChild(gadgetBox);
 
 
     // 最小化ボタンの作成
@@ -363,34 +461,57 @@ function making_dialog(gadgetBox) {
     minimizeButton.style.padding = '5px';
     minimizeButton.style.borderRadius = '3px';
     minimizeButton.style.cursor = 'pointer';
-    gadgetHeader.appendChild(minimizeButton);
 
-    // ダイアログ内のコンテンツエリア
-    var dialogContent = document.createElement('div');
-    dialogContent.id = 'dialogContent';
-    gadgetBox.appendChild(dialogContent);
+
+    // // ダイアログ内のコンテンツエリア
+    // var dialogContent = document.createElement('div');
+    // dialogContent.id = 'dialogContent';
+
 
     // 最小化ボタンのクリックイベント
     minimizeButton.addEventListener('click', function() {
         if (dialogContent.style.display === 'none') {
             dialogContent.style.display = 'block';
+            ToolBer000.style.display = 'block';
             gadgetBox.style.height = '80vh';
             minimizeButton.textContent = '-';
         } else {
             dialogContent.style.display = 'none';
+            ToolBer000.style.display = 'none';
             gadgetBox.style.height = '50px';
             minimizeButton.textContent = '+';
         }
     });
-    
-    addCopyEvent_title(); //タイトルクリックしたらコピーするイベントを追加
+
+    addCopyEvent(gadgetTitle,gadgetTitle); //タイトルクリックしたらコピーするイベントを追加
+
+    // 各要素をBodyに追加
+    // gadgetBox.appendChild(gadgetBody);
+    // gadgetBox.appendChild(dialogContent);
+
+    gadgetHeader.appendChild(minimizeButton);
+
+    gadgetBox.appendChild(toggleArea);
+    gadgetBox.appendChild(toggleLabel);
+    toggleArea.appendChild(toggleCheckbox);
+    toggleArea.appendChild(toggleLabel);
+    toggleLabel.appendChild(toggleSpan);
+
 }  
 
 //  ----- GTMやGtagのコード関連-------
 
 
 // 初期のcode_gtagを生成する関数
-function generateCodeGtag() {
+function generateCodeGtag(event) {
+
+    var clickedElement = event.target;
+    var type = 'innerText'
+    // クリックされた要素が input 要素かどうかを確認
+    if (clickedElement.tagName.toLowerCase() === 'input') {
+        type = 'value'
+    }
+    
     return `
 &lt;script&gt;
     ${if_option01}window.addEventListener("DOMContentLoaded", function() {
@@ -404,18 +525,18 @@ ${if_option02}&lt;/script&gt;
 
 GTMメール
 function (){
-    return document.querySelector('${uniqueSelector}').value;
+    return document.querySelector('${uniqueSelector}').${type};
 }
 
 GTM電話
 function (){
-    return document.querySelector('${uniqueSelector}').value.replace(/[^0-9]/g,'').replace('0','+81');  
+    return document.querySelector('${uniqueSelector}').${type}.replace(/[^0-9]/g,'').replace('0','+81');  
 }`;
         }
 
 // ダイアログボックス内のコンテンツを更新する関数
-function updateDialogContent(uniqueSelector) {
-    var code_gtag = generateCodeGtag();
+function updateDialogContent(uniqueSelector,event) {
+    var code_gtag = generateCodeGtag(event);
     var code_gtag_display = code_gtag
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
@@ -436,12 +557,12 @@ function generateAutoDetectCode(mail_selector,phone_selector,type) {
 
     return `
 <script>
-gtag('set', 'user_data', {
     var ec_mail = document.querySelector('${mail_selector}').${type};
     var ec_phone = document.querySelector('${phone_selector}').${type};
-    "email": var ec_mail, 
-    "phone_number": var ec_phone
-});
+    gtag('set', 'user_data', {
+        "email": ec_mail, 
+        "phone_number": ec_phone
+    });
 </script>
 
 GTMメール
@@ -499,7 +620,7 @@ function auto_detict_text() {
     var mail_selector = null;
     var phone_selector = null;    
     var phone_regex = /^0\d{1,4}-?\d{1,4}-?\d{3,4}$/; // 電話番号の正規表現
-
+    var type = 'innerText'
 
     // 各要素をループして、テキスト内容からtest@test.comを探す
     allElements.forEach(function(element) {
@@ -519,14 +640,11 @@ function auto_detict_text() {
                 return;  // 目的の要素を見つけたらループを終了
             }
         });
+
+        // コンテント内容をUpdate
+        updateDialogContent_autoDetect(mail_selector,phone_selector,type)
     }
 
-
-    return {
-        mail: mail_selector,
-        phone: phone_selector,
-        type: 'innerText'
-    };
 }
 
 
@@ -548,6 +666,7 @@ function auto_detict_input() {
     var phone_input = null;
     var mail_selector = null;
     var phone_selector = null;
+    var type =  'value';
 
     mail_input = check_key_list_fromInput(mail_words)
 
@@ -557,16 +676,15 @@ function auto_detict_input() {
 
         // メールが見つかったときだけ電話の自動検出を行う
         phone_input = check_key_list_fromInput(phone_words)
-        phone_selector = getUniqueSelector(phone_input); // jQuery オブジェクトを渡す
+        if (phone_input) {
+            phone_selector = getUniqueSelector(phone_input); // jQuery オブジェクトを渡す
+        }
 
+        // コンテント内容をUpdate
+        updateDialogContent_autoDetect(mail_selector,phone_selector,type)
+        auto_detict_flag = false;
     }
     
-
-    return {
-        mail: mail_selector,
-        phone: phone_selector,
-         type: 'value'
-    };
 }
 
 
@@ -583,13 +701,18 @@ function check_key_list_fromInput(key_list) {
     var key_input = null;
     // キーワードリストからそのリストに入った言葉の要素を取得
     inputs.some(function(inputElement) {
-        var id = inputElement.id || '';
-        var classList = Array.from(inputElement.classList).join(' ');
-        var name = inputElement.name || '';
-        var placeholder = inputElement.placeholder || '';
+        var id = (inputElement.id || '').toLowerCase();
+        var classList = Array.from(inputElement.classList).join(' ').toLowerCase();
+        var name = (inputElement.name || '').toLowerCase();
+        var placeholder = (inputElement.placeholder || '').toLowerCase();
     
+        // key_list を小文字に変換
+        var lowerCaseKeyList = key_list.map(function(word) {
+            return word.toLowerCase();
+        });
+
         // key_list のいずれかにマッチするかを確認
-        for (var word of key_list) {
+        for (var word of lowerCaseKeyList) {
             if (id.includes(word) || classList.includes(word) || name.includes(word) || placeholder.includes(word)) {
                 key_input = $(inputElement); // jQuery オブジェクトに変換
                 return true; // ループを終了
@@ -623,7 +746,7 @@ function detect_iframe() {
         overlay000.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';  // 透明度50%の赤
         overlay000.style.pointerEvents = 'none';  // クリックを透過させる
 
-        // オーバーレイをiframeの親要素に追加
+        // // オーバーレイをiframeの親要素に追加
         parent.appendChild(overlay000);
     
         // IframeのOriginを取得して表示するための要素を作成
@@ -666,9 +789,9 @@ function detect_iframe() {
 
 
 // コピー後にメッセージが出る関数
-function showToast(message) {
+function showToast(Eventobject) {
     var toast = document.createElement('div');
-    toast.textContent = message;
+    toast.textContent = 'Copied';
     toast.style.position = 'fixed';
     toast.style.backgroundColor = '#333';
     toast.style.color = '#fff';
@@ -680,11 +803,11 @@ function showToast(message) {
     toast.style.opacity = '0'; // 初期状態で透明にする
     toast.style.transition = 'opacity 0.5s'; // フェードイン・フェードアウトの効果
 
-    // 位置を設定するためにgadgetTitleの位置を取得
-    var rect = gadgetTitle.getBoundingClientRect();
+    // 位置を設定するためにEventobjectの位置を取得
+    var rect = Eventobject.getBoundingClientRect();
 
-    toast.style.top = `${rect.top + rect.height / 2}px`; // gadgetTitleの中央に合わせる
-    toast.style.left = `${rect.left + rect.width / 2}px`; // gadgetTitleの中央に合わせる
+    toast.style.top = `${rect.top + rect.height / 2}px`; // Eventobjectの中央に合わせる
+    toast.style.left = `${rect.left + rect.width / 2}px`; // Eventobjectの中央に合わせる
     toast.style.transform = 'translate(-50%, -50%)'; // 中央に位置合わせする
 
     document.body.appendChild(toast);
@@ -706,13 +829,13 @@ function showToast(message) {
 
 
 // gadgetTitleにクリックしたら textContent をコピーするイベントを追加
-function addCopyEvent_title() {
-    gadgetTitle.addEventListener('click', function() {
-        var textToCopy = gadgetTitle.textContent;
+function addCopyEvent(Eventobject,copyContent) {
+    Eventobject.addEventListener('click', function() {
+        var textToCopy = copyContent.textContent;
         
         // クリップボードにコピー
         navigator.clipboard.writeText(textToCopy).then(function() {
-            showToast('copied');
+            showToast(Eventobject);
         }).catch(function(err) {
             console.error('Could not copy text: ', err);
         });
@@ -753,21 +876,5 @@ function overridePreCssRules() {
 }
 
 
-        // スクリプトコードの変数
-//         var code_gtag  = `
-// &lt;script&gt;
-// ${if_option01}window.addEventListener("DOMContentLoaded", function() {
-//     document.querySelectorAll('${uniqueSelector}').forEach(function(element) {
-//         element.addEventListener('click', function(){
-//             gtag('event', 'conversion', {'send_to': '${CV_id_value}/${CV_id_label}'${cv_content}});
-//         });
-//     });
-// });
-// ${if_option02}&lt;/script&gt;
-//         `;
-        
-//         gadgetBody.insertAdjacentHTML('beforeend', `
-//             <pre style="font-size: 14px; font-family: monospace; overflow-x: auto; white-space: pre;">${code_gtag}</pre>
-//             `);
        
 
