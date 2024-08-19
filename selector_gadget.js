@@ -1,5 +1,6 @@
 
-
+//Iframe Detectが変なページ
+//https://onepiece-rental.net/products/detail.php?product_id=4860
 
 
 // jQuery を再割り当て、他のライブラリなどにドルマークを使われている場合エラーが出るのでそれを回避するため
@@ -743,7 +744,7 @@ function detect_iframe() {
         overlay000.style.left = '-5px';  // ボーダーの外側に配置
         overlay000.style.width = `calc(100% + 10px)`;  // ボーダー分の幅を追加
         overlay000.style.height = `calc(100% + 10px)`;  // ボーダー分の高さを追加
-        overlay000.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';  // 透明度50%の赤
+        overlay000.style.backgroundColor = 'rgba(255, 0, 0, 0)';  // 透明度50%の赤
         overlay000.style.pointerEvents = 'none';  // クリックを透過させる
 
         // // オーバーレイをiframeの親要素に追加
