@@ -3,6 +3,7 @@
 //https://onepiece-rental.net/products/detail.php?product_id=4860
 
 
+
 // jQuery を再割り当て、他のライブラリなどにドルマークを使われている場合エラーが出るのでそれを回避するため
 var $ = window.jQuery;
 // グローバル変数として gadgetBox を定義
@@ -13,6 +14,7 @@ var CV_id_label = 'a_aaaaa_bbbbbbbbb'
 var if_option01 = ''
 var if_option02 = ''
 var cv_content = ''
+var testCode = ''
 
 // ダイアログボックスの作成,これだけ関数の外で先に作って、ダイアログボックス内を無視する処理時に未定義エラーを防いでる
 var gadgetBox = document.createElement('div');
@@ -20,7 +22,7 @@ gadgetBox.id = 'selector-gadget';
 gadgetBox.style.position = 'fixed';
 gadgetBox.style.bottom = '10px';
 gadgetBox.style.right = '10px';
-gadgetBox.style.height = '80vh';
+gadgetBox.style.height = '68vh';
 gadgetBox.style.width = '40vw';
 gadgetBox.style.backgroundColor = '#333';
 gadgetBox.style.color = '#fff';
@@ -31,6 +33,8 @@ gadgetBox.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
 gadgetBox.style.zIndex = '1000';
 document.body.appendChild(gadgetBox);
 
+
+
 // updateDialogContent関数で使用するのでグローバルにしてる
 // ヘッダーの作成
 var gadgetHeader = document.createElement('div');
@@ -40,11 +44,15 @@ gadgetHeader.style.alignItems = 'center';
 gadgetHeader.style.marginBottom = '10px'
 gadgetBox.appendChild(gadgetHeader);
 
+// ボディ部分の作成
+var gadgetBody = document.createElement('div');
+gadgetBody.style.marginTop = '10px';
+
 // ツールバーの追加
 var ToolBer000 = document.createElement('div');
 ToolBer000.id = 'ToolBer000';
 ToolBer000.style.marginBottom = '10px';
-gadgetBox.appendChild(ToolBer000);
+gadgetBody.appendChild(ToolBer000);
 
 var gadgetTitle = document.createElement('span');
 gadgetTitle.style.cursor = 'pointer';
@@ -90,7 +98,7 @@ gadgetHeader.appendChild(closeButton);
 var dialogContent = document.createElement('div');
 dialogContent.id = 'dialogContent';
 dialogContent.textContent = ''
-gadgetBox.appendChild(dialogContent);
+gadgetBody.appendChild(dialogContent);
 
 // 緑枠の変数
 var last_greenBorder = [];
@@ -281,9 +289,7 @@ function getUniqueSelector(element) {
 
 function making_dialog(gadgetBox) {
 
-    // ボディ部分の作成
-    // var gadgetBody = document.createElement('div');
-    // gadgetBody.style.marginTop = '10px';
+
 
 
     //ツールバーの中身作成
@@ -291,17 +297,36 @@ function making_dialog(gadgetBox) {
 
 
     // Ifボタン
-    var chicButton = document.createElement('button');
-    chicButton.textContent = 'IF';
-    chicButton.style.display = 'inline-block';
-    chicButton.style.padding = '4px 9px';
-    chicButton.style.fontSize = '16px';
-    chicButton.style.fontWeight = 'bold';
-    chicButton.style.color = '#ffffff';
-    chicButton.style.backgroundColor = '#78bd78';
-    chicButton.style.border = '2px solid #ccc';
-    chicButton.style.borderRadius = '3px';
-    chicButton.style.cursor = 'pointer';
+    var ifButton = document.createElement('button');
+    ifButton.textContent = 'IF';
+    ifButton.style.display = 'inline-block';
+    ifButton.style.padding = '4px 9px';
+    ifButton.style.fontSize = '16px';
+    ifButton.style.fontWeight = 'bold';
+    ifButton.style.color = '#ffffff';
+    ifButton.style.backgroundColor = 'gray';
+    ifButton.style.border = '2px solid #ccc';
+    ifButton.style.borderRadius = '3px';
+    ifButton.style.cursor = 'pointer';
+    var ifStatus = false;
+
+    ifButton.addEventListener('click', ifUpdate);
+
+    function ifUpdate(event){
+        var location_if = convertUrlToPath(window.location.href);
+        if(ifStatus){
+            ifStatus = false;  // ifStatusをfalseに設定
+            if_option01 = '' ;
+            if_option02 = '' ;
+            ifButton.style.backgroundColor = 'gray';
+        }else{
+            ifStatus = true;  // ifStatusをtrueに設定
+            if_option01 = `if(window.location.href.includes("${location_if}")) {\n` ;
+            if_option02 = '}\n' ;
+            ifButton.style.backgroundColor = '#78bd78';
+        }
+        updateDialogContent(uniqueSelector, event); 
+    }
 
     // コピーボタン
     var copyButton = document.createElement('button');
@@ -317,8 +342,7 @@ function making_dialog(gadgetBox) {
     copyButton.style.cursor = 'pointer';
     copyButton.style.marginRight = '10px';
 
-    ToolBer000.appendChild(copyButton);
-    ToolBer000.appendChild(chicButton);
+
 
     // addCopyEvent(copyButton,dialogContent);
 
@@ -328,6 +352,37 @@ function making_dialog(gadgetBox) {
         console.error('dialogContent is not defined or not found.');
     }
     
+    // テストコードボタン
+    var testCodeBtn = document.createElement('button');
+    testCodeBtn.textContent = 'Test';
+    testCodeBtn.style.display = 'inline-block';
+    testCodeBtn.style.padding = '4px 9px';
+    testCodeBtn.style.fontSize = '16px';
+    testCodeBtn.style.fontWeight = 'bold';
+    testCodeBtn.style.color = '#ffffff';
+    testCodeBtn.style.backgroundColor = '#78bd78';
+    testCodeBtn.style.border = '2px solid #ccc';
+    testCodeBtn.style.borderRadius = '3px';
+    testCodeBtn.style.cursor = 'pointer';
+    testCodeBtn.style.marginRight = '10px';
+
+    
+    testCodeBtn.addEventListener('click', function(event) {
+        navigator.clipboard.writeText(testCode)
+            .then(function() {
+                showToast(event.target)
+            })
+            .catch(function(err) {
+                console.error('Could not copy text: ', err);
+            });
+    });
+
+
+
+    ToolBer000.appendChild(copyButton);
+    ToolBer000.appendChild(testCodeBtn);
+    ToolBer000.appendChild(ifButton);
+
 
     // ToolBer000.appendChild(IfBtnSpan);
     // ToolBer000.appendChild(IfBtnLabel);
@@ -391,6 +446,7 @@ function making_dialog(gadgetBox) {
     // トグルボタンの作成
     var toggleArea = document.createElement('div');
     toggleArea.style.margin = 'auto';
+    toggleArea.style.marginTop = '10px';
     // toggleArea.style.width = '60px';
 
     var toggleCheckbox = document.createElement('input');
@@ -448,8 +504,6 @@ function making_dialog(gadgetBox) {
     toggleCheckbox.addEventListener('change', updateToggleButton);
 
 
-
-
     // 最小化ボタンの作成
     var minimizeButton = document.createElement('button');
     minimizeButton.textContent = '-';
@@ -471,14 +525,13 @@ function making_dialog(gadgetBox) {
 
     // 最小化ボタンのクリックイベント
     minimizeButton.addEventListener('click', function() {
-        if (dialogContent.style.display === 'none') {
-            dialogContent.style.display = 'block';
-            ToolBer000.style.display = 'block';
-            gadgetBox.style.height = '80vh';
+        if (gadgetBody.style.display === 'none') {
+            gadgetBody.style.display = 'block';
+            gadgetBox.style.height = ''; // もとのサイズに戻すためにheightをクリア
+            gadgetBox.style.height = '68vh'; 
             minimizeButton.textContent = '-';
         } else {
-            dialogContent.style.display = 'none';
-            ToolBer000.style.display = 'none';
+            gadgetBody.style.display = 'none';
             gadgetBox.style.height = '50px';
             minimizeButton.textContent = '+';
         }
@@ -491,9 +544,9 @@ function making_dialog(gadgetBox) {
     // gadgetBox.appendChild(dialogContent);
 
     gadgetHeader.appendChild(minimizeButton);
-
-    gadgetBox.appendChild(toggleArea);
-    gadgetBox.appendChild(toggleLabel);
+    gadgetBox.appendChild(gadgetBody);
+    gadgetBody.appendChild(toggleArea);
+    gadgetBody.appendChild(toggleLabel);
     toggleArea.appendChild(toggleCheckbox);
     toggleArea.appendChild(toggleLabel);
     toggleLabel.appendChild(toggleSpan);
@@ -535,6 +588,17 @@ function (){
 }`;
         }
 
+
+function generateTestCode() {  
+    return  `${if_option01}document.querySelectorAll('${uniqueSelector}').forEach(function(element) {
+    element.addEventListener('click', function(){
+        alert('テスト成功');
+    });
+});
+${if_option02}`
+            ;
+}
+
 // ダイアログボックス内のコンテンツを更新する関数
 function updateDialogContent(uniqueSelector,event) {
     var code_gtag = generateCodeGtag(event);
@@ -549,6 +613,9 @@ function updateDialogContent(uniqueSelector,event) {
 
     gadgetTitle.textContent = `document.querySelector('${uniqueSelector}')`;
     addGreenBorder(uniqueSelector);    
+
+    // テスト用のコードを更新
+    testCode = generateTestCode();
         
 }
 
@@ -876,6 +943,22 @@ function overridePreCssRules() {
     document.head.appendChild(style);
 }
 
+//URL stringからホストとPathnameにする
+//URLじゃない文字列のときには？を検索してそれ以降の文字を消す（パラメーターを消してる
+function convertUrlToPath(urlString) {
+    try {
+        var url = new URL(urlString);
+        var host = url.host;
+        var pathname = url.pathname;
+        return host + pathname;
+    } catch (e) {
+        var index = urlString.indexOf('?');
+        if (index !== -1) {
+            return urlString.substring(0, index);
+        }
 
+        return urlString;
+    }
+}
        
 
