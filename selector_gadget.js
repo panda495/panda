@@ -935,6 +935,7 @@ function overridePreCssRules() {
             color: white;
             font-style: monospace;
             line-height: 110%;
+            text-align: left;
             /* 他のスタイルも必要に応じてここに追加 */
         }
     `;
