@@ -5,7 +5,7 @@
     textarea : 'Googleによるテスト送信です', 
     input : {
       'text'           : 'テスト',
-      // 'tel'            : '09012345678', TypeをTelにして住所入れてることが多いので一時的にコメントアウト26Aug2024
+      'tel'            : '09012345678', 
       'email'          : 'test@test.com',
       'number'         : '', // 入力が無ければinputのmax属性の値が入る
       'range'          : '', // 入力が無ければinputのmax属性の値が入る
@@ -138,7 +138,6 @@
     }
 
     // 郵便番号に関する処理
-
     //labelの文字列を使った郵便の処理
     setInputValueForLabel('郵便', '3730012');
 
