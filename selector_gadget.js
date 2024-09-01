@@ -8,13 +8,17 @@
 var $ = window.jQuery;
 // グローバル変数として gadgetBox を定義
 // 変数の初期値宣言
-var uniqueSelector = ''
-var CV_id_value = 'AW-1111111111111'
-var CV_id_label = 'a_aaaaa_bbbbbbbbb'
-var if_option01 = ''
-var if_option02 = ''
-var cv_content = ''
-var testCode = ''
+var uniqueSelector = '';
+var CV_id_value = 'AW-1111111111111';
+var CV_id_label = 'a_aaaaa_bbbbbbbbb';
+var if_option01 = '';
+var if_option02 = '';
+var cv_content = '';
+var testCode = '';
+var GTM_mail ='';
+var GTM_phone = '';
+var GTM_code = '';
+var location_if = convertUrlToPath(window.location.href);
 
 // ダイアログボックスの作成,これだけ関数の外で先に作って、ダイアログボックス内を無視する処理時に未定義エラーを防いでる
 var gadgetBox = document.createElement('div');
@@ -113,14 +117,14 @@ var auto_detict_flag = true;
 
     overridePreCssRules();//外部CSSでPre要素についての言及があったときに、Dialog内の表示がおかしくなるので、ルールを上書き
 
+
     loadJQuery(function() {
         // jQueryがロードされた後にクリックイベントリスナーを設定
         document.addEventListener('click', setupClickListener);
 
         detect_iframe();
 
-        // auto_detictをInputで探してもしもなかったらtest@test.comという文字列があるかを
-        // auto_detict_text()で探している
+        // auto_detictをInputで探してもしもなかったらauto_detict_text()で探している
         auto_detict_input();
         if(auto_detict_flag){
             auto_detict_text();
@@ -313,7 +317,7 @@ function making_dialog(gadgetBox) {
     ifButton.addEventListener('click', ifUpdate);
 
     function ifUpdate(event){
-        var location_if = convertUrlToPath(window.location.href);
+        
         if(ifStatus){
             ifStatus = false;  // ifStatusをfalseに設定
             if_option01 = '' ;
@@ -378,70 +382,37 @@ function making_dialog(gadgetBox) {
     });
 
 
+    // GTMコピーボタン
+    var GTM_copyBtn = document.createElement('button');
+    GTM_copyBtn.textContent = 'GTM';
+    GTM_copyBtn.style.display = 'inline-block';
+    GTM_copyBtn.style.padding = '4px 9px';
+    GTM_copyBtn.style.fontSize = '16px';
+    GTM_copyBtn.style.fontWeight = 'bold';
+    GTM_copyBtn.style.color = '#ffffff';
+    GTM_copyBtn.style.backgroundColor = '#78bd78';
+    GTM_copyBtn.style.border = '2px solid #ccc';
+    GTM_copyBtn.style.borderRadius = '3px';
+    GTM_copyBtn.style.cursor = 'pointer';
+    GTM_copyBtn.style.marginRight = '10px';
+
+    GTM_copyBtn.addEventListener('click', function(event) {
+        navigator.clipboard.writeText(GTM_code)
+            .then(function() {
+                showToast(event.target)
+            })
+            .catch(function(err) {
+                console.error('Could not copy text: ', err);
+            });
+    });
 
     ToolBer000.appendChild(copyButton);
     ToolBer000.appendChild(testCodeBtn);
+    ToolBer000.appendChild(GTM_copyBtn);
     ToolBer000.appendChild(ifButton);
 
 
-    // ToolBer000.appendChild(IfBtnSpan);
-    // ToolBer000.appendChild(IfBtnLabel);
-
-
-    // var IfBtn000 = document.createElement('input');
-    // IfBtn000.type = 'checkbox';
-    // IfBtn000.id = 'ifBtn000';
-    // IfBtn000.checked = false; // 初期状態はオフ
-    // IfBtn000.style.display = 'none'; // チェックボックス自体は非表示
-    
-    // var IfBtnLabel = document.createElement('label');
-    // IfBtnLabel.htmlFor = 'ifBtn000'; // Corrected the 'for' attribute to match 'id'
-    // IfBtnLabel.style.display = 'block';
-    // IfBtnLabel.style.boxSizing = 'border-box';
-    // IfBtnLabel.style.textAlign = 'center';
-    // IfBtnLabel.style.border = '2px solid #ccc';
-    // IfBtnLabel.style.borderRadius = '3px';
-    // IfBtnLabel.style.height = '60px';
-    // IfBtnLabel.style.fontSize = '18px';
-    // IfBtnLabel.style.lineHeight = '60px';
-    // IfBtnLabel.style.fontWeight = 'bold';
-    // IfBtnLabel.style.background = '#eee';
-    // IfBtnLabel.style.boxShadow = '3px 3px 6px #888';
-    // IfBtnLabel.style.transition = '.3s';
-    // IfBtnLabel.style.cursor = 'pointer';
-    
-    // var IfBtnSpan = document.createElement('span');
-    // IfBtnSpan.style.display = 'inline-block';
-    // IfBtnSpan.style.width = '100%';
-    // IfBtnSpan.style.height = '100%';
-    // IfBtnSpan.style.lineHeight = '60px'; // 中央揃え
-    // IfBtnLabel.style.background = '#78bd78';
-    // IfBtnLabel.style.boxShadow = 'none';
-    // IfBtnSpan.textContent = 'ON';
-    // IfBtnSpan.style.color = '#fff';
-    
-    // IfBtnLabel.appendChild(IfBtnSpan);
-    
-    // // IfBtn000のスタイルを更新
-    // function updateIfBtnButton() {
-    //     if (IfBtn000.checked) {
-    //         IfBtnLabel.style.background = '#78bd78';
-    //         IfBtnLabel.style.boxShadow = 'none';
-    //         IfBtnSpan.textContent = 'ON';
-    //         IfBtnSpan.style.color = '#fff';
-    //         document.addEventListener('click', setupClickListener); // 必要に応じてリスナーを追加
-    
-    //     } else {
-    //         IfBtnLabel.style.background = '#eee';
-    //         IfBtnLabel.style.boxShadow = '3px 3px 6px #888';
-    //         IfBtnSpan.textContent = 'OFF';
-    //         IfBtnSpan.style.color = '#aaa';
-    //         document.removeEventListener('click', setupClickListener); // 必要に応じてリスナーを削除
-    //     }
-    // }
-    
-    // // チェックボックスの変更時にIfBtnLabelのスタイルを更新
-    // IfBtn000.addEventListener('change', updateIfBtnButton);
+// -------ON/OFFボタンの作成--------------
 
     // トグルボタンの作成
     var toggleArea = document.createElement('div');
@@ -565,6 +536,23 @@ function generateCodeGtag(event) {
     if (clickedElement.tagName.toLowerCase() === 'input') {
         type = 'value'
     }
+
+    // 変数の更新、クリップボードにコピーするよう
+    GTM_mail = `function (){
+    return document.querySelector('${uniqueSelector}').${type};
+}`;
+
+    GTM_phone = `function (){
+    return document.querySelector('${uniqueSelector}').${type}.replace(/[^0-9]/g,'').replace('0','+81');  
+}`;
+    
+    GTM_code=`${location_if}
+GTMメール
+${GTM_mail}
+
+GTM電話
+${GTM_phone}
+    `
     
     return `
 &lt;script&gt;
@@ -578,17 +566,16 @@ function generateCodeGtag(event) {
 ${if_option02}&lt;/script&gt;
 
 GTMメール
-function (){
-    return document.querySelector('${uniqueSelector}').${type};
-}
+${GTM_mail}
 
 GTM電話
-function (){
-    return document.querySelector('${uniqueSelector}').${type}.replace(/[^0-9]/g,'').replace('0','+81');  
-}`;
+${GTM_phone}
+
+`;
         }
 
 
+//テスト用のコードを作成する関数
 function generateTestCode() {  
     return  `${if_option01}document.querySelectorAll('${uniqueSelector}').forEach(function(element) {
     element.addEventListener('click', function(){
@@ -616,12 +603,25 @@ function updateDialogContent(uniqueSelector,event) {
 
     // テスト用のコードを更新
     testCode = generateTestCode();
+    
+
         
 }
 
 
 // AutoDetectのContentを作成する関数
 function generateAutoDetectCode(mail_selector,phone_selector,type) {
+    GTM_code=`${location_if}
+GTMメール
+function (){
+    return document.querySelector('${mail_selector}').${type};
+}
+
+GTM電話
+function (){
+    return document.querySelector('${phone_selector}').${type}.replace(/[^0-9]/g,'').replace('0','+81');  
+} 
+`
 
     return `
 <script>
@@ -633,15 +633,9 @@ function generateAutoDetectCode(mail_selector,phone_selector,type) {
     });
 </script>
 
-GTMメール
-function (){
-    return document.querySelector('${mail_selector}').${type};
-}
+${GTM_code}
 
-GTM電話
-function (){
-    return document.querySelector('${phone_selector}').${type}.replace(/[^0-9]/g,'').replace('0','+81');  
-}`;
+`;
 }
 
 
@@ -679,39 +673,60 @@ function updateDialogContent_autoDetect(mail_selector,phone_selector,type) {
                 
 }
 
-
+// テキスト要素からメールアドレスと電話番号を取得
 function auto_detict_text() {
     // すべての要素を取得
     var allElements = document.querySelectorAll('*');
 
+    var target_selector = null;
     var targetElement = null;
     var mail_selector = null;
     var phone_selector = null;    
     var phone_regex = /^0\d{1,4}-?\d{1,4}-?\d{3,4}$/; // 電話番号の正規表現
-    var type = 'innerText'
+    var mail_regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    var ECphone_number = '09012345678' ;
+    var type = 'innerText' ;
 
-    // 各要素をループして、テキスト内容からtest@test.comを探す
-    allElements.forEach(function(element) {
-        if (element.textContent.includes('test@test.com')) {
-            targetElement = $(element); // jQuery オブジェクトに変換
-            mail_selector = getUniqueSelector(targetElement); // jQuery オブジェクトを渡す
 
-            return;  // 目的の要素を見つけたらループを終了
-        }
-    });
-    //メールが見つかったらPhoneも探す
-    if(mail_selector){
+    function find_phone_mail(searchText){
+        // 各要素をループして、テキスト内容からターゲットの文字列を探す
         allElements.forEach(function(element) {
-            if (phone_regex.test(element.textContent)) {
-                targetElement = $(element); // jQuery オブジェクトに変換
-                phone_selector = getUniqueSelector(targetElement); // jQuery オブジェクトを渡す
-                return;  // 目的の要素を見つけたらループを終了
+            var textContent = element.textContent;
+
+            if (searchText instanceof RegExp) {
+                // 正規表現の場合
+                if (searchText.test(textContent)) {
+                    targetElement = $(element); // jQuery オブジェクトに変換
+                    target_selector = getUniqueSelector(targetElement); // jQuery オブジェクトを渡す
+                    return false;  // 目的の要素を見つけたらループを終了
+                }
+            } else {
+                // 通常の文字列の場合
+                if (textContent.includes(searchText)) {
+                    targetElement = $(element); // jQuery オブジェクトに変換
+                    target_selector = getUniqueSelector(targetElement); // jQuery オブジェクトを渡す
+                    return false;  // 目的の要素を見つけたらループを終了
+                }
             }
         });
+
+        return target_selector;
+    }
+
+
+    //test@test.comで探して見つからなければ正規表現で検索
+    var mail_selector = find_phone_mail('test@test.com') || find_phone_mail(mail_regex);
+
+    //メールが見つかったらPhoneを探す
+    if(mail_selector){
+        var phone_selector = find_phone_mail(ECphone_number) || find_phone_mail(phone_regex);
 
         // コンテント内容をUpdate
         updateDialogContent_autoDetect(mail_selector,phone_selector,type)
     }
+    
+    
+
 
 }
 
