@@ -143,11 +143,12 @@
 
     var all_inputs_length = document.querySelectorAll('input');
 
+    //inputのMaxlengthが7桁なら郵便番号
     all_inputs_length.forEach(input => {
       if (input.maxLength === 7) {
           input.value = '3730012';
       }
-  });
+    });
 
     //labelの文字列を使った電話番号処理
     setInputValueForLabel('電話', '09012345678');
@@ -155,6 +156,7 @@
   };
   
 
+// -----------main関数終了、ここから下は関数宣言---------------
 
 
   // Required属性をチェック
@@ -171,10 +173,14 @@
           // required 属性がある場合も追加
           else if (inputs[i].hasAttribute('required')) {
               filteredInputs.push(inputs[i]);
-              hasRequired = true; // Required属性がある要素が見つかった場合、フラグを立てる
+              
           }
       }
-
+      // フラグを立てる：filteredInputs が inputs の半分以上の場合に true にする
+      if (filteredInputs.length > inputs.length / 2) {
+        hasRequired = true;
+      }
+  
       // Required属性がある要素があれば、それを返す。なければ元の inputs を返す。
       return hasRequired ? filteredInputs : inputs;
   }
@@ -241,6 +247,9 @@
 
       }
   }
+
+
+  
   // KeywordでLabelの文字列を検索して、TrueならばValueに任意の値を入力
   // setInputValueForLabel('郵便', '3730012');
   function setInputValueForLabel(keyword, value) {
