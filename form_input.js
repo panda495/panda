@@ -65,22 +65,37 @@ var formElements = {
 
 (function () {
 
-//---Text areaの処理----
-    var textareas = formElements.textareas;
-    for (var i = 0; i < textareas.length; i += 1) {
-      textareas[i].value = 'Googleによるテスト送信です';
-    }
+  processTextareas(formElements.textareas); //テキストエリアの処理
+  processSelects(formElements.selects); //セレクトタグの処理
+  processInputs(formElements.inputs); //インプットタグの処理、メイン処理
+
+})();
+
   
+
+// -----------関数宣言---------------
+
+//---Text areaの処理----
+function processTextareas(){
+  var textareas = formElements.textareas;
+  for (var textarea of textareas) {
+    textarea.value = 'Googleによるテスト送信です';
+  }
+}
+
 //----selectタグの処理-----
+function processSelects(){
     var selects = formElements.selects;
-    for (var i = 0; i < selects.length; i += 1) {
-      var options = selects[i].getElementsByTagName('option');
+    for (var select of selects) {
+      var options = select.getElementsByTagName('option');
       if (options.length > 0) {
-        selects[i].value = options[options.length - 1].value;
+        select.value = options[options.length - 1].value;
       }
     }
+}
       
 //----inputタグの処理-----
+function processInputs(){
     // すべての input タグを取得
     var all_inputs = formElements.inputs;
 
@@ -115,11 +130,8 @@ var formElements = {
         }
       }
     }
+}
 
-})();
-  
-
-// -----------main関数終了、ここから下は関数宣言---------------
 
 function CheckInput_MaxLength(inputElement){
   if (inputElement.maxLength === 7) {
