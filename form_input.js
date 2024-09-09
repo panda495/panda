@@ -27,6 +27,7 @@ var text_list = {
   'zip': '3730012',
   '郵便': '3730012',
   '住所': 'テスト',
+  '年齢': '25',
   'パスワード':'test123456'
 };
 
@@ -46,10 +47,10 @@ var checkFunctions = [
   CheckInput_inputType,
   CheckInput_placeholer,
   CheckInput_label,
+  CheckInput_attribute,
   CheckInput_parentElement,
   CheckInput_siblingElement,
   CheckInput_cousinElement,
-  CheckInput_attribute,
   CheckInput_MaxLength
 ];
 
@@ -117,9 +118,10 @@ function processInputs(){
       if ((input.type === 'checkbox' || input.type === 'radio') || !input.value) {
 
 
-        // 各関数でInputタグのValueを埋めていく
+        // 各関数をまわしてInputタグのValueを埋めていく
         for (var checkFunc of checkFunctions) {
           if (checkFunc(input)) {
+            console.log(checkFunc + ':' + input)
             break;  // 成功したらループを終了して次のinputへ
           }
         }
@@ -382,7 +384,14 @@ function CheckInput_label(inputElement) {
   }
 
   // ID 属性を持つ label 要素の最初にヒットした要素を取得
-  var label_text = document.querySelector('label[for="' + inputId + '"]');
+  var target_label = document.querySelector('label[for="' + inputId + '"]');
+  
+  // target_label が存在するかチェック
+  if (target_label) {
+    var label_text = target_label.textContent;
+  } else {
+    var label_text = ''; // ラベルが見つからない場合の処理
+  }
 
   if(label_text){
     // text_listの各キーがlabelに含まれているかチェック
@@ -410,10 +419,11 @@ function check_required_attr(inputs) {
             
         }
     }
-    // フラグを立てる：filteredInputs が inputs の半分以上の場合に true にする
-    if (filteredInputs.length > inputs.length / 2) {
+    // フラグを立てる：filteredInputs が inputs の 4 分の 3 以上の場合に true にする
+    if (filteredInputs.length >= inputs.length * 3 / 4) {
       hasRequired = true;
     }
+
 
     // Required属性がある要素があれば、それを返す。なければ元の inputs を返す。
     return hasRequired ? filteredInputs : inputs;
@@ -434,11 +444,17 @@ function check_classList_required(inputs) {
         // クラス名に 'required' を含む場合も追加
         else if (inputs[i].classList.toString().includes('required')) {
             filteredInputs.push(inputs[i]);
-            hasRequired = true; // Required属性がある要素が見つかった場合、フラグを立てる
+            
         }
     }
 
-    // Required属性がある要素があれば、それを返す。なければ元の inputs を返す。
+    // フラグを立てる：filteredInputs が inputs の 4 分の 3 以上の場合に true にする
+    if (filteredInputs.length >= inputs.length * 3 / 4) {
+      hasRequired = true;
+    }
+
+
+    // hasRequiredがTrueならばFilterdInputsを、なければ元の inputs を返す。
     return hasRequired ? filteredInputs : inputs;
 }
 
