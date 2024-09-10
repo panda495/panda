@@ -26,12 +26,14 @@ var text_list = {
   // 'addres': '3730012',機能しないこと多いのでコメントアウト26Aug2024
   'zip': '3730012',
   '郵便': '3730012',
+  '〒': '3730012',
   '住所': 'テスト',
   '年齢': '25',
   'パスワード':'test123456'
 };
 
 var phoneKeys = ['tel', 'phone', '電話'];
+var zipKeys = ['郵便', 'zip', '〒'];
 
 // 正規表現のリスト、正規表現はKeyとValueを取得するにはMapにする必要ある
 var regex_map = new Map([
@@ -46,6 +48,7 @@ var regex_map = new Map([
 var checkFunctions = [
   CheckInput_inputType,
   CheckInput_placeholer,
+  CheckInput_TableTag,
   CheckInput_label,
   CheckInput_attribute,
   CheckInput_parentElement,
@@ -100,9 +103,9 @@ function processInputs(){
     // すべての input タグを取得
     var all_inputs = formElements.inputs;
 
-    // type が hidden でない input 要素のみを取得
+    // type が hidden または file でない input 要素のみを取得
     var inputs = Array.from(all_inputs).filter(function(input) {
-        return input.type !== 'hidden';
+      return input.type !== 'hidden' && input.type !== 'file';
     });
 
     //required属性をチェックして、もしあればそれでフィルターかけてる
@@ -133,6 +136,29 @@ function processInputs(){
       }
     }
 }
+
+function CheckInput_TableTag(inputElement) {
+  // 親要素を取得
+  var parentElement = inputElement.parentElement;
+  var target_TR;
+
+  if (parentElement && parentElement.tagName === 'TD') {
+      // 親の親要素を取得
+      var grandParentElement = parentElement.parentElement;
+
+      // 親の親要素が TR タグかどうかチェック
+      if (grandParentElement && grandParentElement.tagName === 'TR') {
+          target_TR = grandParentElement;
+      }
+  }
+
+  if(target_TR){
+    applyTextListValue(target_TR.textContent,inputElement)
+  }
+
+  return !!inputElement.value;  // valueが設定されているかを返す
+}
+
 
 
 function CheckInput_MaxLength(inputElement){
@@ -166,6 +192,13 @@ function CheckInput_attribute(inputElement) {
         // Keyが電話番号ならPhoneに関するInputが3つあるかチェック
         if (phoneKeys.includes(key)) {
           Phone_3inputs();
+          if(inputElement.value){
+            break;
+          }
+        }
+        // Keyが郵便なら郵便に関するInputが2つあるかチェック
+        if (zipKeys.includes(key)) {
+          zip_2input(inputElement);
           if(inputElement.value){
             break;
           }
@@ -320,7 +353,7 @@ function CheckInput_parentElement(inputElement) {
 
 }
 
-
+//引数のText内にキーワードがあるかをチェック
 function applyTextListValue(text,input){
   for (var key in text_list) {
     if (text.includes(key)) {
@@ -348,24 +381,8 @@ function applyTextListValue(text,input){
       }
 
       //郵便がヒットしたときに兄弟要素が2つあるかチェック
-      if (key == '郵便') {
-        // 親要素を取得
-        var parentElement = input.parentElement;
-
-        // 親要素が存在しない場合は false を返す
-        if (!parentElement) {
-          return false;
-        }
-
-        // 親要素の子要素をすべて取得
-        var siblingInputs = parentElement.querySelectorAll('input');
-        
-        // Inputが3つ以上あるかチェック
-        if(siblingInputs.length == 2){
-          siblingInputs[0].value = '373';
-          siblingInputs[1].value = '0012';
-          return;
-        }
+      if (key == '郵便' || key == '〒' ) {
+        zip_2input(input);
       }
 
         input.value = text_list[key];  // 含まれていたら、inputのvalueを設定
@@ -373,6 +390,26 @@ function applyTextListValue(text,input){
     }
 }
 }
+
+
+function zip_2input(inputElement){
+  var parentElement = inputElement.parentElement;
+
+  // 親要素が存在チェック
+  if (parentElement) {
+    // 親要素の子要素をすべて取得
+    var siblingInputs = parentElement.querySelectorAll('input');
+    
+    // Inputが2つあるかチェック
+    if(siblingInputs.length == 2){
+      siblingInputs[0].value = '373';
+      siblingInputs[1].value = '0012';
+      return;
+    }
+  }
+}
+
+
 
 
 function CheckInput_label(inputElement) {
