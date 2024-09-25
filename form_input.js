@@ -103,6 +103,9 @@ function processInputs(){
     // すべての input タグを取得
     var all_inputs = formElements.inputs;
 
+
+
+//inputタグから対象外のものを外していく
     // type が hidden または file でない input 要素のみを取得
     var inputs = Array.from(all_inputs).filter(function(input) {
       return input.type !== 'hidden' && input.type !== 'file';
@@ -113,7 +116,8 @@ function processInputs(){
 
     //requiredという文字列がClass Listに含まれているかをチェックして、もしあればフィルターかけてる（主にWPCF7フォーム用
     inputs = check_classList_required(inputs)
-  
+
+
 //-----メインの処理-------
     for (var input of inputs) {
       //処理の段階でまだチェックしてないInputにValueが入ることがあるのでチェックしてる
@@ -440,8 +444,12 @@ function CheckInput_label(inputElement) {
 
 
 // Required属性をチェック
+// inputタグ全体からRadioとCheckboxを除いたものの中でRequiredが入ってるのが4分の3以上あれば
+// Filtered Listを返す
+// 返すリストにはRadio, checkboxが含まれている必要があるのでこのような処理にしてる
 function check_required_attr(inputs) {
     var filteredInputs = []; // 新しい配列を作成
+    var radioAndCheck = [];
     var hasRequired = false;
 
     // InputにRequiredが使用されているかチェックし、条件を満たす要素を追加
@@ -449,6 +457,7 @@ function check_required_attr(inputs) {
         // type が radio または checkbox の場合は無条件で追加
         if (inputs[i].type === 'radio' || inputs[i].type === 'checkbox') {
             filteredInputs.push(inputs[i]);
+            radioAndCheck.push(inputs[i]);
         }
         // required 属性がある場合も追加
         else if (inputs[i].hasAttribute('required')) {
@@ -457,7 +466,7 @@ function check_required_attr(inputs) {
         }
     }
     // フラグを立てる：filteredInputs が inputs の 4 分の 3 以上の場合に true にする
-    if (filteredInputs.length >= inputs.length * 3 / 4) {
+    if (filteredInputs.length - radioAndCheck.length >= (inputs.length - radioAndCheck.length) * 3 / 4) {
       hasRequired = true;
     }
 
@@ -467,16 +476,21 @@ function check_required_attr(inputs) {
 }
 
 
-// クラス名に 'required' が含まれるか、または type が 'radio' または 'checkbox' の場合をチェック
+// クラス名に 'required' が含まれてるInputが全体の4分の3以上あるかをチェック
+// inputタグ全体からRadioとCheckboxを除いたものの中でRequiredが入ってるのが4分の3以上あれば
+// Filtered Listを返す
+// 返すリストにはRadio, checkboxが含まれている必要があるのでこのような処理にしてる
 function check_classList_required(inputs) {
     var filteredInputs = []; // 新しい配列を作成
+    var radioAndCheck = [];
     var hasRequired = false;
 
     // InputにRequiredが使用されているかチェックし、条件を満たす要素を追加
     for (var i = 0; i < inputs.length; i += 1) {
-        // type が radio または checkbox の場合は無条件で追加
+        // type が radio または checkbox の場合は飛ばす
         if (inputs[i].type === 'radio' || inputs[i].type === 'checkbox') {
-            filteredInputs.push(inputs[i]);
+          filteredInputs.push(inputs[i]);
+          radioAndCheck.push(inputs[i]);
         }
         // クラス名に 'required' を含む場合も追加
         else if (inputs[i].classList.toString().includes('required')) {
@@ -486,7 +500,7 @@ function check_classList_required(inputs) {
     }
 
     // フラグを立てる：filteredInputs が inputs の 4 分の 3 以上の場合に true にする
-    if (filteredInputs.length >= inputs.length * 3 / 4) {
+    if (filteredInputs.length - radioAndCheck.length >= (inputs.length - radioAndCheck.length) * 3 / 4) {
       hasRequired = true;
     }
 
