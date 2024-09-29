@@ -20,114 +20,385 @@ var GTM_phone = '';
 var GTM_code = '';
 var location_if = convertUrlToPath(window.location.href);
 
-// ダイアログボックスの作成,これだけ関数の外で先に作って、ダイアログボックス内を無視する処理時に未定義エラーを防いでる
-var gadgetBox = document.createElement('div');
-gadgetBox.id = 'selector-gadget';
-gadgetBox.style.position = 'fixed';
-gadgetBox.style.bottom = '10px';
-gadgetBox.style.right = '10px';
-gadgetBox.style.height = '68vh';
-gadgetBox.style.width = '40vw';
-gadgetBox.style.backgroundColor = '#333';
-gadgetBox.style.color = '#fff';
-gadgetBox.style.opacity = '0.8';
-gadgetBox.style.padding = '10px';
-gadgetBox.style.borderRadius = '5px';
-gadgetBox.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
-gadgetBox.style.zIndex = '1000';
-document.body.appendChild(gadgetBox);
+
+// メインのiframeコンテナの作成
+var mainIframe = document.createElement('iframe');
+mainIframe.style.position = 'fixed';
+mainIframe.style.bottom = '0px';
+mainIframe.style.right = '0px';
+mainIframe.style.height = '68vh';
+mainIframe.style.width = '40vw';
+mainIframe.style.border = 'none'
+mainIframe.style.zIndex = '99999999';
+mainIframe.style.borderRadius = '10px 10px 0 0';  // 上側の左右の角を丸める
+mainIframe.style.margin = '0';
+mainIframe.style.padding = '0';
+
+// 関数外で変数を定義（グローバル変数）
+var iframeDocument;
+var gadgetBox;
+var gadgetHeader;
+var gadgetBody;
+var ToolBer000;
+var gadgetTitle;
+var closeButton;
+var dialogContent;
+var auto_detict_flag = true;
+
+var ifButton;
+var ifStatus = false;
+var copyButton;
+var testCodeBtn;
+var GTM_copyBtn;
+var Code_template;
+var minimizeButton;
+
+mainIframe.onload = function() {
+    iframeDocument = mainIframe.contentDocument || mainIframe.contentWindow.document;
+
+    // CSSスタイルを定義（gadgetHeader内のbuttonにスタイルを適用）
+    var style = iframeDocument.createElement('style');
+    style.textContent = `
+    body {
+            margin: 0;
+            padding: 0; /* 必要に応じて */
+    }
+    #ToolBer000 button {
+        background-color: #78bd78;
+        color: #ffffff;
+        border: 2px solid #ccc;
+        padding: 4px 8px;
+        margin: 0px 10px 0 0; /* 上、右、下、左の順で設定 */
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    #ToolBer000 select {
+        background-color: #78bd78;
+        color: #ffffff;
+        border: 2px solid #ccc;
+        padding: 4px 8px;
+        margin: 0px 10px 0 0; /* 上、右、下、左の順で設定 */
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 3px;
+        cursor: pointer;
+        appearance: none; /* デフォルトの矢印を非表示に */
+    }
+    #gadgetHeader button {
+        background-color: transparent; /* 修正 */
+        color: #fff;
+        font-size: 30px;
+        cursor: pointer;
+        border: none;
+    }
+    `;    
+    // iframeの<head>にスタイルを追加
+    iframeDocument.head.appendChild(style);
 
 
+    // ダイアログボックスの作成、全体のコンテナー
+    gadgetBox = document.createElement('div');
+    gadgetBox.id = 'selector-gadget';
+    gadgetBox.style.height = '94%';
+    gadgetBox.style.width = '94%';
+    gadgetBox.style.backgroundColor = '#333';
+    gadgetBox.style.color = '#fff';
+    gadgetBox.style.opacity = '0.8';
+    gadgetBox.style.padding = '10px';
+    gadgetBox.style.borderRadius = '5px';
+    gadgetBox.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+    gadgetBox.style.zIndex = '1000';
 
-// updateDialogContent関数で使用するのでグローバルにしてる
-// ヘッダーの作成
-var gadgetHeader = document.createElement('div');
+//------ ヘッダー部分の作成
+gadgetHeader = document.createElement('div');
+gadgetHeader.id = 'gadgetHeader';
 gadgetHeader.style.display = 'flex';
 gadgetHeader.style.justifyContent = 'space-between';
 gadgetHeader.style.alignItems = 'center';
-gadgetHeader.style.marginBottom = '10px'
+gadgetHeader.style.marginBottom = '10px';
+gadgetHeader.style.position = 'relative'; // ボタンの位置固定のために追加
 gadgetBox.appendChild(gadgetHeader);
 
-// ボディ部分の作成
-var gadgetBody = document.createElement('div');
-gadgetBody.style.marginTop = '10px';
-
-// ツールバーの追加
-var ToolBer000 = document.createElement('div');
-ToolBer000.id = 'ToolBer000';
-ToolBer000.style.marginBottom = '10px';
-gadgetBody.appendChild(ToolBer000);
-
-var gadgetTitle = document.createElement('span');
+// Header内のタイトルの作成
+gadgetTitle = document.createElement('span');
 gadgetTitle.style.cursor = 'pointer';
 gadgetTitle.textContent = 'Selector Gadget';
-gadgetTitle.setAttribute('title', 'Click to copy'); // ツールチップ
+gadgetTitle.setAttribute('title', 'Click to copy');
 gadgetHeader.appendChild(gadgetTitle);
 
+addCopyEvent(gadgetTitle, gadgetTitle); //クリックしたらコピーするイベントを追加
+// `document.querySelector('${uniqueSelector}')`;
+// 最小化ボタンの作成
+minimizeButton = document.createElement('button');
+minimizeButton.textContent = '-';
+minimizeButton.style.position = 'absolute';
+minimizeButton.style.right = '40px'; // 右側から20px内側
+minimizeButton.addEventListener('click', function() {
+    if (mainIframe.style.height === '50px') {
+        mainIframe.style.height = '68vh';
+        minimizeButton.textContent = '-';
+    } else {
+        mainIframe.style.height = '50px';
+        minimizeButton.textContent = '+';
+    }
+});
+gadgetHeader.appendChild(minimizeButton);
 
-
-var closeButton = document.createElement('button');
+// 閉じるボタンの作成
+closeButton = document.createElement('button');
 closeButton.textContent = '×';
-closeButton.style.background = 'none';
-closeButton.style.border = 'none';
-closeButton.style.color = '#fff';
-closeButton.style.fontSize = '16px';
-closeButton.style.cursor = 'pointer';
-
+closeButton.style.position = 'absolute';
+closeButton.style.right = '0px'; // 右側から10px内側
 closeButton.onclick = function() {
     gadgetBox.style.display = 'none';
     document.removeEventListener('click', setupClickListener);
 
-    //選択したところの緑を消してる
     last_greenBorder.forEach(function(element) {
         element.style.border = ''; // 緑枠を削除
     });
 
-    //Iframeの赤い枠とオーバーレイ消してる
+    //iframe ditectで検出した赤色の枠を削除
     var all_iframe = document.querySelectorAll('iframe');
-
     all_iframe.forEach(function(iframe) {
         if (iframe.style.border === '5px solid red') {
             iframe.style.border = '';
         }
     });
-
-    
-    
-    
 };
 gadgetHeader.appendChild(closeButton);
 
-// ダイアログ内のコンテンツエリア
-var dialogContent = document.createElement('div');
-dialogContent.id = 'dialogContent';
-dialogContent.textContent = ''
-gadgetBody.appendChild(dialogContent);
+
+
+//----------- ボディ部分の作成
+gadgetBody = document.createElement('div');
+gadgetBody.style.marginTop = '10px';
+
+
+//----------- ツールバー部分の作成
+    ToolBer000 = document.createElement('div');
+    ToolBer000.id = 'ToolBer000';
+    ToolBer000.style.marginBottom = '10px';
+    gadgetBody.appendChild(ToolBer000);
+
+    // OnOffボタン
+    var OnOffButton = document.createElement('button');
+    OnOffButton.textContent = 'ON';  // 初期状態を 'ON' に設定
+
+
+    // ボタンの状態を保持するフラグ（初期状態を true に設定）
+    var isOn = true;
+
+    // OnOffボタンのクリックイベント
+    OnOffButton.addEventListener('click', function() {
+        if (isOn) {
+            // 現在 ON なら OFF にする
+            OnOffButton.textContent = 'OFF';
+            OnOffButton.style.backgroundColor = 'gray';
+            isOn = false;
+            document.removeEventListener('click', setupClickListener);
+        } else {
+            // 現在 OFF なら ON にする
+            OnOffButton.textContent = 'ON';
+            OnOffButton.style.backgroundColor = '#78bd78';  // 緑色に変更
+            isOn = true;
+            document.addEventListener('click', setupClickListener);
+        }
+    });
+
+
+    // Ifボタン
+    ifButton = document.createElement('button');
+    ifButton.textContent = 'IF';
+    ifButton.style.backgroundColor = 'gray';
+
+    ifButton.addEventListener('click', ifUpdate);
+
+    function ifUpdate(event) {
+        if (ifStatus) {
+            ifStatus = false;
+            if_option01 = '';
+            if_option02 = '';
+            ifButton.style.backgroundColor = 'gray';
+        } else {
+            ifStatus = true;
+            if_option01 = `if(window.location.href.includes("${location_if}")) {\n`;
+            if_option02 = '}\n';
+            ifButton.style.backgroundColor = '#78bd78';
+        }
+        updateDialogContent(uniqueSelector, event);
+    }
+
+    // コピーボタン
+    // copyButton = document.createElement('button');
+    // copyButton.textContent = 'Copy';
+
+    // if (dialogContent) {
+    //     addCopyEvent(copyButton, dialogContent);
+    // } else {
+    //     console.error('dialogContent is not defined or not found.');
+    // }
+
+    // テストコードボタン
+    testCodeBtn = document.createElement('button');
+    testCodeBtn.textContent = 'Test';
+
+    testCodeBtn.addEventListener('click', function(event) {
+        navigator.clipboard.writeText(testCode)
+            .then(function() {
+                showToast(event.target);
+            })
+            .catch(function(err) {
+                console.error('Could not copy text: ', err);
+            });
+    });
+
+    // GTMコピーボタン
+    GTM_copyBtn = document.createElement('button');
+    GTM_copyBtn.textContent = 'GTM';
+
+
+    GTM_copyBtn.addEventListener('click', function(event) {
+        navigator.clipboard.writeText(GTM_code)
+            .then(function() {
+                showToast(event.target);
+            })
+            .catch(function(err) {
+                console.error('Could not copy text: ', err);
+            });
+    });
+
+    // よくあるコード集
+    Code_template = document.createElement('select');
+
+    // 最初に表示されるプレースホルダーオプションを追加
+    var defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'コードテンプレ';
+    defaultOption.disabled = true;  // 選択不可にする
+    defaultOption.selected = true;  // デフォルトで選択状態にする
+
+    // オプションを追加
+    var option1 = document.createElement('option');
+    option1.textContent = 'EC global Tag';
+    option1.value = `<!-- Google tag (gtag.js) RenSato0611-->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-xxxxxxxxxxx"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'AW-xxxxxxxxxxx', {'allow_enhanced_conversions':true});
+</script>
+`;
+
+    var option2 = document.createElement('option');
+    option2.textContent = 'Cross domain';
+    option2.value =`<!-- Global site tag (gtag.js)  -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-xxxxxxxxxxx"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('set', 'linker', { 'domains': ['example.com', 'example.co.jp'], 'decorate_forms': true });
+  gtag('js', new Date());
+
+  gtag('config', 'AW-xxxxxxxxxxxxx');
+</script>`;
+
+    var option3 = document.createElement('option');
+    option3.textContent = '電話クリック';
+    option3.value =`<script>
+    window.addEventListener("DOMContentLoaded", function() {
+       document.querySelectorAll('a[href*="tel:"]').forEach(function(element) {
+            element.addEventListener('click', function(){
+                gtag('event', 'conversion', {'send_to': 'AW-111111111/xxxxxxxxxxxx'});
+            });
+        });
+    });
+</script>`;
+
+    var option4 = document.createElement('option');
+    option4.textContent = 'LINEクリック';
+    option4.value =`<script>
+    window.addEventListener("DOMContentLoaded", function() {
+       document.querySelectorAll('a[href*="lin.ee"]').forEach(function(element) {
+            element.addEventListener('click', function(){
+                gtag('event', 'conversion', {'send_to': 'AW-111111111/xxxxxxxxxxxx'});
+            });
+        });
+    });
+</script>`;
+
+    
+
+    Code_template.appendChild(defaultOption);
+    Code_template.appendChild(option1);
+    Code_template.appendChild(option2);
+    Code_template.appendChild(option3);
+    Code_template.appendChild(option4);
+
+    // セレクトボックスの変更イベントにコピー機能を追加
+    Code_template.addEventListener('change', function() {
+        var selectedValue = Code_template.value;
+
+        // クリップボードにコピー
+        navigator.clipboard.writeText(selectedValue).then(function() {
+            showToast(Code_template)
+        }).catch(function(err) {
+            console.error('Could not copy text: ', err);
+        });
+    });
+
+
+
+    ToolBer000.appendChild(OnOffButton);
+    // ToolBer000.appendChild(copyButton);
+    ToolBer000.appendChild(testCodeBtn);
+    ToolBer000.appendChild(GTM_copyBtn);
+    ToolBer000.appendChild(ifButton);
+    ToolBer000.appendChild(Code_template);
+
+// --------ダイアログ内のコンテンツエリア
+    dialogContent = document.createElement('div');
+    dialogContent.id = 'dialogContent';
+    dialogContent.textContent = '';
+
+    gadgetBody.appendChild(dialogContent);
+    gadgetBox.appendChild(gadgetBody);
+
+
+    iframeDocument.body.appendChild(gadgetBox);
+};
+
+
+document.body.appendChild(mainIframe);
+
 
 // 緑枠の変数
 var last_greenBorder = [];
 
-var auto_detict_flag = true;
+
+
+
 
 
 // --------メイン関数部分-------------
 (function() {    
 
-    making_dialog(gadgetBox);
-
-    overridePreCssRules();//外部CSSでPre要素についての言及があったときに、Dialog内の表示がおかしくなるので、ルールを上書き
-
+    // making_dialog(gadgetBox);
 
     loadJQuery(function() {
         // jQueryがロードされた後にクリックイベントリスナーを設定
         document.addEventListener('click', setupClickListener);
 
-        detect_iframe();
+        // detect_iframe();
 
         // auto_detictをInputで探してもしもなかったらauto_detict_text()で探している
         auto_detict_input();
         if(auto_detict_flag){
             auto_detict_text();
+            
         }
 
     });
@@ -157,9 +428,9 @@ function setupClickListener(event) {
 
 
     // ダイアログボックス内のクリックを無視
-    if (gadgetBox.contains(event.target) || event.target.classList.contains('StopEvent000')) {
-        return;
-    }
+    // if (gadgetBox.contains(event.target) || event.target.classList.contains('StopEvent000')) {
+    //     return;
+    // }
 
 
     event.preventDefault();  // デフォルトのアクションを防ぐ
@@ -291,238 +562,6 @@ function getUniqueSelector(element) {
     return findUniqueSelector(element);
 }
 
-function making_dialog(gadgetBox) {
-
-
-
-
-    //ツールバーの中身作成
-    // ToolBer000.style.backgroundColor = 'red';
-
-
-    // Ifボタン
-    var ifButton = document.createElement('button');
-    ifButton.textContent = 'IF';
-    ifButton.style.display = 'inline-block';
-    ifButton.style.padding = '4px 9px';
-    ifButton.style.fontSize = '16px';
-    ifButton.style.fontWeight = 'bold';
-    ifButton.style.color = '#ffffff';
-    ifButton.style.backgroundColor = 'gray';
-    ifButton.style.border = '2px solid #ccc';
-    ifButton.style.borderRadius = '3px';
-    ifButton.style.cursor = 'pointer';
-    var ifStatus = false;
-
-    ifButton.addEventListener('click', ifUpdate);
-
-    function ifUpdate(event){
-        
-        if(ifStatus){
-            ifStatus = false;  // ifStatusをfalseに設定
-            if_option01 = '' ;
-            if_option02 = '' ;
-            ifButton.style.backgroundColor = 'gray';
-        }else{
-            ifStatus = true;  // ifStatusをtrueに設定
-            if_option01 = `if(window.location.href.includes("${location_if}")) {\n` ;
-            if_option02 = '}\n' ;
-            ifButton.style.backgroundColor = '#78bd78';
-        }
-        updateDialogContent(uniqueSelector, event); 
-    }
-
-    // コピーボタン
-    var copyButton = document.createElement('button');
-    copyButton.textContent = 'Copy';
-    copyButton.style.display = 'inline-block';
-    copyButton.style.padding = '4px 9px';
-    copyButton.style.fontSize = '16px';
-    copyButton.style.fontWeight = 'bold';
-    copyButton.style.color = '#ffffff';
-    copyButton.style.backgroundColor = '#78bd78';
-    copyButton.style.border = '2px solid #ccc';
-    copyButton.style.borderRadius = '3px';
-    copyButton.style.cursor = 'pointer';
-    copyButton.style.marginRight = '10px';
-
-
-
-    // addCopyEvent(copyButton,dialogContent);
-
-    if (dialogContent) {
-        addCopyEvent(copyButton, dialogContent);
-    } else {
-        console.error('dialogContent is not defined or not found.');
-    }
-    
-    // テストコードボタン
-    var testCodeBtn = document.createElement('button');
-    testCodeBtn.textContent = 'Test';
-    testCodeBtn.style.display = 'inline-block';
-    testCodeBtn.style.padding = '4px 9px';
-    testCodeBtn.style.fontSize = '16px';
-    testCodeBtn.style.fontWeight = 'bold';
-    testCodeBtn.style.color = '#ffffff';
-    testCodeBtn.style.backgroundColor = '#78bd78';
-    testCodeBtn.style.border = '2px solid #ccc';
-    testCodeBtn.style.borderRadius = '3px';
-    testCodeBtn.style.cursor = 'pointer';
-    testCodeBtn.style.marginRight = '10px';
-
-    
-    testCodeBtn.addEventListener('click', function(event) {
-        navigator.clipboard.writeText(testCode)
-            .then(function() {
-                showToast(event.target)
-            })
-            .catch(function(err) {
-                console.error('Could not copy text: ', err);
-            });
-    });
-
-
-    // GTMコピーボタン
-    var GTM_copyBtn = document.createElement('button');
-    GTM_copyBtn.textContent = 'GTM';
-    GTM_copyBtn.style.display = 'inline-block';
-    GTM_copyBtn.style.padding = '4px 9px';
-    GTM_copyBtn.style.fontSize = '16px';
-    GTM_copyBtn.style.fontWeight = 'bold';
-    GTM_copyBtn.style.color = '#ffffff';
-    GTM_copyBtn.style.backgroundColor = '#78bd78';
-    GTM_copyBtn.style.border = '2px solid #ccc';
-    GTM_copyBtn.style.borderRadius = '3px';
-    GTM_copyBtn.style.cursor = 'pointer';
-    GTM_copyBtn.style.marginRight = '10px';
-
-    GTM_copyBtn.addEventListener('click', function(event) {
-        navigator.clipboard.writeText(GTM_code)
-            .then(function() {
-                showToast(event.target)
-            })
-            .catch(function(err) {
-                console.error('Could not copy text: ', err);
-            });
-    });
-
-    ToolBer000.appendChild(copyButton);
-    ToolBer000.appendChild(testCodeBtn);
-    ToolBer000.appendChild(GTM_copyBtn);
-    ToolBer000.appendChild(ifButton);
-
-
-// -------ON/OFFボタンの作成--------------
-
-    // トグルボタンの作成
-    var toggleArea = document.createElement('div');
-    toggleArea.style.margin = 'auto';
-    toggleArea.style.marginTop = '10px';
-    // toggleArea.style.width = '60px';
-
-    var toggleCheckbox = document.createElement('input');
-    toggleCheckbox.type = 'checkbox';
-    toggleCheckbox.id = 'toggleCheckbox';
-    toggleCheckbox.checked = true; // 初期状態はオン
-    toggleCheckbox.style.display = 'none'; // チェックボックス自体は非表示
-
-    var toggleLabel = document.createElement('label');
-    toggleLabel.htmlFor = 'toggleCheckbox';
-    toggleLabel.style.display = 'block';
-    toggleLabel.style.boxSizing = 'border-box';
-    toggleLabel.style.textAlign = 'center';
-    toggleLabel.style.border = '2px solid #ccc';
-    toggleLabel.style.borderRadius = '3px';
-    toggleLabel.style.height = '60px';
-    toggleLabel.style.fontSize = '18px';
-    toggleLabel.style.lineHeight = '60px';
-    toggleLabel.style.fontWeight = 'bold';
-    toggleLabel.style.background = '#eee';
-    toggleLabel.style.boxShadow = '3px 3px 6px #888';
-    toggleLabel.style.transition = '.3s';
-    toggleLabel.style.cursor = 'pointer';
-
-    var toggleSpan = document.createElement('span');
-    toggleSpan.style.display = 'inline-block';
-    toggleSpan.style.width = '100%';
-    toggleSpan.style.height = '100%';
-    toggleSpan.style.lineHeight = '60px'; // 中央揃え
-    toggleLabel.style.background = '#78bd78';
-    toggleLabel.style.boxShadow = 'none';
-    toggleSpan.textContent = 'ON';
-    toggleSpan.style.color = '#fff';
-
-
-    // トグルボタンのスタイルを更新
-    function updateToggleButton() {
-        if (toggleCheckbox.checked) {
-            toggleLabel.style.background = '#78bd78';
-            toggleLabel.style.boxShadow = 'none';
-            toggleSpan.textContent = 'ON';
-            toggleSpan.style.color = '#fff';
-            document.addEventListener('click', setupClickListener);
-
-        } else {
-            toggleLabel.style.background = '#eee';
-            toggleLabel.style.boxShadow = '3px 3px 6px #888';
-            toggleSpan.textContent = 'OFF';
-            toggleSpan.style.color = '#aaa';
-            document.removeEventListener('click', setupClickListener);
-        }
-    }
-
-    // チェックボックスの変更時にトグルボタンのスタイルを更新
-    toggleCheckbox.addEventListener('change', updateToggleButton);
-
-
-    // 最小化ボタンの作成
-    var minimizeButton = document.createElement('button');
-    minimizeButton.textContent = '-';
-    minimizeButton.style.position = 'absolute';
-    minimizeButton.style.top = '5px';
-    minimizeButton.style.right = '40px'; // Closeボタンの左側に配置
-    minimizeButton.style.backgroundColor = '#555';
-    minimizeButton.style.color = '#fff';
-    minimizeButton.style.border = 'none';
-    minimizeButton.style.padding = '5px';
-    minimizeButton.style.borderRadius = '3px';
-    minimizeButton.style.cursor = 'pointer';
-
-
-    // // ダイアログ内のコンテンツエリア
-    // var dialogContent = document.createElement('div');
-    // dialogContent.id = 'dialogContent';
-
-
-    // 最小化ボタンのクリックイベント
-    minimizeButton.addEventListener('click', function() {
-        if (gadgetBody.style.display === 'none') {
-            gadgetBody.style.display = 'block';
-            gadgetBox.style.height = ''; // もとのサイズに戻すためにheightをクリア
-            gadgetBox.style.height = '68vh'; 
-            minimizeButton.textContent = '-';
-        } else {
-            gadgetBody.style.display = 'none';
-            gadgetBox.style.height = '50px';
-            minimizeButton.textContent = '+';
-        }
-    });
-
-    addCopyEvent(gadgetTitle,gadgetTitle); //タイトルクリックしたらコピーするイベントを追加
-
-    // 各要素をBodyに追加
-    // gadgetBox.appendChild(gadgetBody);
-    // gadgetBox.appendChild(dialogContent);
-
-    gadgetHeader.appendChild(minimizeButton);
-    gadgetBox.appendChild(gadgetBody);
-    gadgetBody.appendChild(toggleArea);
-    gadgetBody.appendChild(toggleLabel);
-    toggleArea.appendChild(toggleCheckbox);
-    toggleArea.appendChild(toggleLabel);
-    toggleLabel.appendChild(toggleSpan);
-
-}  
 
 //  ----- GTMやGtagのコード関連-------
 
@@ -593,12 +632,15 @@ function updateDialogContent(uniqueSelector,event) {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
-    var dialogContent = document.querySelector('#dialogContent');
+    var iframeDocument = mainIframe.contentDocument || mainIframe.contentWindow.document;
+    var dialogContent = iframeDocument.querySelector('#dialogContent');
+
     if (dialogContent) {
         dialogContent.innerHTML = `<pre style="font-size: 13px; font-family: monospace; overflow-x: auto; white-space: pre;">${code_gtag_display}</pre>`;
     }
 
-    gadgetTitle.textContent = `document.querySelector('${uniqueSelector}')`;
+    // gadgetTitle.textContent = `document.querySelector('${uniqueSelector}')`;
+    gadgetTitle.textContent = uniqueSelector;
     addGreenBorder(uniqueSelector);    
 
     // テスト用のコードを更新
@@ -648,7 +690,9 @@ function updateDialogContent_autoDetect(mail_selector,phone_selector,type) {
         .replace(/>/g, '&gt;');
 
         
-    var dialogContent = document.querySelector('#dialogContent');
+    var iframeDocument = mainIframe.contentDocument || mainIframe.contentWindow.document;
+    var dialogContent = iframeDocument.querySelector('#dialogContent');
+
     if (dialogContent) {
         dialogContent.innerHTML = `<pre style="font-size: 13px; font-family: monospace; overflow-x: auto; white-space: pre;">${auto_detictContent_display}</pre>`;
     }
@@ -942,22 +986,6 @@ function addGreenBorder(selector) {
 }
 
 
-function overridePreCssRules() {
-    // 新しいスタイル要素を作成
-    const style = document.createElement('style');
-    style.textContent = `
-        pre {
-            color: white;
-            font-style: monospace;
-            line-height: 110%;
-            text-align: left;
-            /* 他のスタイルも必要に応じてここに追加 */
-        }
-    `;
-
-    // <head> 内にスタイル要素を追加
-    document.head.appendChild(style);
-}
 
 //URL stringからホストとPathnameにする
 //URLじゃない文字列のときには？を検索してそれ以降の文字を消す（パラメーターを消してる
