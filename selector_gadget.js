@@ -721,7 +721,7 @@ function updateDialogContent_autoDetect(mail_selector,phone_selector,type) {
     gadgetTitle.textContent = '自動検出が成功しました';
 
     if(flag_hidden_input){
-        gadgetTitle.textContent = 'Input hiddenで自動検出しました';
+        gadgetTitle.textContent = 'Input hiddenから自動検出しました';
     }    
                 
 }
@@ -847,7 +847,7 @@ function check_key_list_fromInput(key_list) {
 
     return key_input;
 
-    
+
     // 一致する input を検索するヘルパー関数
     function findMatchingInput(inputs, keyList, includeHidden = false) {
         for (var inputElement of inputs) {
