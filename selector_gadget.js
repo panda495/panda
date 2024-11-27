@@ -1,7 +1,8 @@
 
-//Iframe Detectが変なページ
-//https://onepiece-rental.net/products/detail.php?product_id=4860
 
+//------------ 更新履歴
+// 2024_1128  auto_detict_inputでInputを取得するときにHiddenも取得するように変更
+// 変更箇所はcheck_key_list_fromInput関数内のInputを取得する部分
 
 
 // jQuery を再割り当て、他のライブラリなどにドルマークを使われている場合エラーが出るのでそれを回避するため
@@ -383,7 +384,7 @@ var last_greenBorder = [];
 
 
 
-// --------メイン関数部分-------------
+// -----------------メイン関数部分-------------------------------------------------------------
 (function() {    
 
     // making_dialog(gadgetBox);
@@ -653,6 +654,9 @@ function updateDialogContent(uniqueSelector,event) {
 
 // AutoDetectのContentを作成する関数
 function generateAutoDetectCode(mail_selector,phone_selector,type) {
+
+
+    // クリップボードにコピー用にGTM_codeという変数を定義している
     GTM_code=`${location_if}
 GTMメール
 function (){
@@ -713,7 +717,12 @@ function updateDialogContent_autoDetect(mail_selector,phone_selector,type) {
         last_greenBorder.push(phoneElement); // 最新の緑枠要素をリストに追加
     }
 
+    
     gadgetTitle.textContent = '自動検出が成功しました';
+
+    if(flag_hidden_input){
+        gadgetTitle.textContent = 'Input hiddenで自動検出しました';
+    }    
                 
 }
 
@@ -732,13 +741,28 @@ function auto_detict_text() {
     var type = 'innerText' ;
 
 
+    //test@test.comで探して見つからなければ正規表現で検索
+    var mail_selector = find_phone_mail('test@test.com') || find_phone_mail(mail_regex);
+
+    //メールが見つかったらPhoneを探す
+
+    if(mail_selector){
+        var phone_selector = find_phone_mail(ECphone_number) || find_phone_mail(phone_regex);
+
+        // コンテント内容をUpdate
+        updateDialogContent_autoDetect(mail_selector,phone_selector,type)
+    }
+    
+
     function find_phone_mail(searchText){
-        // 各要素をループして、テキスト内容からターゲットの文字列を探す
+        // 各要素をループして、テキスト内容からターゲットの文字列,引数のsearchTextを探す
         allElements.forEach(function(element) {
             var textContent = element.textContent;
 
+
+            // searchTextが正規表現かどうかを判断
             if (searchText instanceof RegExp) {
-                // 正規表現の場合
+                //testメソッドは正規表現が一致するかを試すメソッド
                 if (searchText.test(textContent)) {
                     targetElement = $(element); // jQuery オブジェクトに変換
                     target_selector = getUniqueSelector(targetElement); // jQuery オブジェクトを渡す
@@ -756,20 +780,6 @@ function auto_detict_text() {
 
         return target_selector;
     }
-
-
-    //test@test.comで探して見つからなければ正規表現で検索
-    var mail_selector = find_phone_mail('test@test.com') || find_phone_mail(mail_regex);
-
-    //メールが見つかったらPhoneを探す
-    if(mail_selector){
-        var phone_selector = find_phone_mail(ECphone_number) || find_phone_mail(phone_regex);
-
-        // コンテント内容をUpdate
-        updateDialogContent_autoDetect(mail_selector,phone_selector,type)
-    }
-    
-    
 
 
 }
@@ -815,41 +825,58 @@ function auto_detict_input() {
 }
 
 
+var flag_hidden_input = false;
 
 function check_key_list_fromInput(key_list) {
     // すべての input タグを取得
     var all_inputs = document.querySelectorAll('input');
-
-    // type が hidden でない input 要素のみを取得
-    var inputs = Array.from(all_inputs).filter(function(input) {
-        return input.type !== 'hidden';
+    
+    // key_list を小文字に変換
+    var lowerCaseKeyList = key_list.map(function(word) {
+        return word.toLowerCase();
     });
 
-    var key_input = null;
-    // キーワードリストからそのリストに入った言葉の要素を取得
-    inputs.some(function(inputElement) {
-        var id = (inputElement.id || '').toLowerCase();
-        var classList = Array.from(inputElement.classList).join(' ').toLowerCase();
-        var name = (inputElement.name || '').toLowerCase();
-        var placeholder = (inputElement.placeholder || '').toLowerCase();
-    
-        // key_list を小文字に変換
-        var lowerCaseKeyList = key_list.map(function(word) {
-            return word.toLowerCase();
-        });
+    // 一致する input を検索
+    var key_input = findMatchingInput(all_inputs, lowerCaseKeyList);
 
-        // key_list のいずれかにマッチするかを確認
-        for (var word of lowerCaseKeyList) {
-            if (id.includes(word) || classList.includes(word) || name.includes(word) || placeholder.includes(word)) {
-                key_input = $(inputElement); // jQuery オブジェクトに変換
-                return true; // ループを終了
+    // key_input が見つからない場合は hidden input を検索
+    if (!key_input) {
+        flag_hidden_input = false; // hiddenが見つかる前にリセット
+        key_input = findMatchingInput(all_inputs, lowerCaseKeyList, true); // hidden input を含めて再検索
+    }
+
+    return key_input;
+
+    
+    // 一致する input を検索するヘルパー関数
+    function findMatchingInput(inputs, keyList, includeHidden = false) {
+        for (var inputElement of inputs) {
+            var id = (inputElement.id || '').toLowerCase();
+            var classList = Array.from(inputElement.classList).join(' ').toLowerCase();
+            var name = (inputElement.name || '').toLowerCase();
+            var placeholder = (inputElement.placeholder || '').toLowerCase();
+
+            // hidden の input を除外する場合
+            if (!includeHidden && inputElement.type === 'hidden') continue;
+
+            // key_list のいずれかにマッチするかを確認
+            for (var word of keyList) {
+                if (id.includes(word) || classList.includes(word) || name.includes(word) || placeholder.includes(word)) {
+                    // 一致した input を返す
+                    if (inputElement.type === 'hidden') {
+                        flag_hidden_input = true; // hidden input が見つかった場合、フラグを立てる
+                    }
+                    return $(inputElement); // jQuery オブジェクトとして返す
+                }
             }
         }
-        return false;
-    });
+        return null; // 見つからなかった場合は null を返す
+    }
 
-    return key_input; // ここで key_input を返す
 }
+
+
+
 
 
 function detect_iframe() {
@@ -1005,4 +1032,3 @@ function convertUrlToPath(urlString) {
     }
 }
        
-
