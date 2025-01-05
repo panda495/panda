@@ -1,6 +1,12 @@
 
+// 確認ページでInput がHiddenであるページ
+// https://xanadu-beauty.com/contact-comfirm
+
+// to DO List
+// コードサンプルをJSON形式を読み込む式にして拡張性を高くする
 
 //------------ 更新履歴
+// 2025_0106  input Hiddenを単体関数とし、Input,input hidden, textの順でAuto detectするようにした
 // 2024_1128  auto_detict_inputでInputを取得するときにHiddenも取得するように変更
 // 変更箇所はcheck_key_list_fromInput関数内のInputを取得する部分
 
@@ -28,7 +34,7 @@ mainIframe.style.position = 'fixed';
 mainIframe.style.bottom = '0px';
 mainIframe.style.right = '0px';
 mainIframe.style.height = '68vh';
-mainIframe.style.width = '40vw';
+mainIframe.style.width = '60vw';
 mainIframe.style.border = 'none'
 mainIframe.style.zIndex = '99999999';
 mainIframe.style.borderRadius = '10px 10px 0 0';  // 上側の左右の角を丸める
@@ -395,10 +401,16 @@ var last_greenBorder = [];
 
         // detect_iframe();
 
-        // auto_detictをInputで探してもしもなかったらauto_detict_text()で探している
+        // auto_detictをInputで探してもしもなかったらHidden InputのValueで検索、
+        // それでもなければauto_detict_text()で探している
         auto_detict_input();
         if(auto_detict_flag){
-            auto_detict_text();
+            auto_detict_Hidden_input();
+
+            if(!flag_hidden_input){
+                auto_detict_text();
+            }
+            
             
         }
 
@@ -781,6 +793,7 @@ function auto_detict_text() {
         return target_selector;
     }
 
+    var all_inputs = document.querySelectorAll('input');
 
 }
 
@@ -826,55 +839,82 @@ function auto_detict_input() {
 
 
 var flag_hidden_input = false;
+function auto_detict_Hidden_input() {
+    // すべての //HiddenのInputだけ取得
+    var hiddenInputs = document.querySelectorAll('input[type="hidden"]');
+    // Inptuタグから見つからなかったらHiddenのInputのValueを検索する
+    var phone_regex = /^0\d{1,4}-?\d{1,4}-?\d{3,4}$/; // 電話番号の正規表現
+    var mail_regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    var mail_selector = null;
+    var phone_selector = null;
+    var type =  'value';
+
+    // HiddenのValueからメールのInputのセクレタ‐を作成する
+    hiddenInputs.forEach(inputElement => {
+        var input_value = inputElement.value;
+        
+        if(mail_regex.test(input_value)){
+            mail_selector = getUniqueSelector($(inputElement));
+        }
+    })
+
+    // メールが見つかったときだけ電話の自動検出を行う
+    if(mail_selector){
+        hiddenInputs.forEach(inputElement => {
+            var input_value = inputElement.value;
+
+            if(phone_regex.test(input_value)){
+                phone_selector = getUniqueSelector($(inputElement));
+            }
+        })
+
+        // コンテント内容をUpdate
+        flag_hidden_input = true;
+        updateDialogContent_autoDetect(mail_selector,phone_selector,type)
+
+    }
+
+
+}
+
+
+
+
 
 function check_key_list_fromInput(key_list) {
     // すべての input タグを取得
     var all_inputs = document.querySelectorAll('input');
     
+
+    //HiddenのInputを除去する、 NodeList を配列に変換してから filter を使う
+    var visible_inputs = Array.from(all_inputs).filter(function(input) {
+        return input.type !== 'hidden';
+    });
+
     // key_list を小文字に変換
     var lowerCaseKeyList = key_list.map(function(word) {
         return word.toLowerCase();
     });
 
-    // 一致する input を検索
-    var key_input = findMatchingInput(all_inputs, lowerCaseKeyList);
-
-    // key_input が見つからない場合は hidden input を検索
-    if (!key_input) {
-        flag_hidden_input = false; // hiddenが見つかる前にリセット
-        key_input = findMatchingInput(all_inputs, lowerCaseKeyList, true); // hidden input を含めて再検索
-    }
-
-    return key_input;
+    for (var inputElement of visible_inputs) {
+        var id = (inputElement.id || '').toLowerCase();
+        var classList = Array.from(inputElement.classList).join(' ').toLowerCase();
+        var name = (inputElement.name || '').toLowerCase();
+        var placeholder = (inputElement.placeholder || '').toLowerCase();
 
 
-    // 一致する input を検索するヘルパー関数
-    function findMatchingInput(inputs, keyList, includeHidden = false) {
-        for (var inputElement of inputs) {
-            var id = (inputElement.id || '').toLowerCase();
-            var classList = Array.from(inputElement.classList).join(' ').toLowerCase();
-            var name = (inputElement.name || '').toLowerCase();
-            var placeholder = (inputElement.placeholder || '').toLowerCase();
+        // key_list のいずれかにマッチするかを確認
+        for (var word of lowerCaseKeyList) {
+            if (id.includes(word) || classList.includes(word) || name.includes(word) || placeholder.includes(word)) {
 
-            // hidden の input を除外する場合
-            if (!includeHidden && inputElement.type === 'hidden') continue;
-
-            // key_list のいずれかにマッチするかを確認
-            for (var word of keyList) {
-                if (id.includes(word) || classList.includes(word) || name.includes(word) || placeholder.includes(word)) {
-                    // 一致した input を返す
-                    if (inputElement.type === 'hidden') {
-                        flag_hidden_input = true; // hidden input が見つかった場合、フラグを立てる
-                    }
-                    return $(inputElement); // jQuery オブジェクトとして返す
-                }
+                return $(inputElement); // jQuery オブジェクトとして返す
             }
         }
-        return null; // 見つからなかった場合は null を返す
     }
+    return null; // 見つからなかった場合は null を返す
 
 }
-
 
 
 
